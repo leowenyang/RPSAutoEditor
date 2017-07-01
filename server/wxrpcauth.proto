@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+// The wxAuth service definition.
+service wxAuth {
+  // wxAuth
+  rpc checkClientVersion (AuthRequest) returns (AuthReply) {}
+
+  // wxAuth
+  rpc checkServerVersion (AuthRequest) returns (AuthReply) {}
+
+  // wxAuth
+  rpc wxRPCAuth (AuthRequest) returns (AuthReply) {}
+
+  // get wxBot info
+  rpc getWxBotKey (AuthRequest) returns (ByteReplay) {}
+
+  // wxBot check
+  rpc checkWxBot (AuthRequest) returns (AuthReply) {}
+
+  // AutoEditor
+  rpc CallAutoEditor (AuthRequest) returns (AuthReply) {}
+}
+
+// The request message containing the user's name.
+message AuthRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message AuthReply {
+  string message = 1;
+}
+
+// The response message containing the greetings
+message ByteReplay {
+  bytes message = 1;
+}
