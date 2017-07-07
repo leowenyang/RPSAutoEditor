@@ -9,8 +9,32 @@ from ffmpegwrapper.videoautoeditor import *
 from ffmpegwrapper.timerCounter import *
 
 def test():
+    handle = ['outputFormat', 'H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.01.34][等级3][进球]/11.主相机.MP4', 'test.mp4']
     editor = VideoAutoEditor()
-    editor.getVideoLen('11.MP4')
+    editor.outputFormat(handle)
+
+    handle = ['addNullAudio', 'clip_fadein.mp4', 'null.mp3', 'clip_fadein_out.mp4']
+    editor = VideoAutoEditor()
+    editor.addNullAudio(handle)
+
+    handle = ['merge', 'clip_fadein_out.mp4', 'test.mp4', 'outFile.mp4']
+    editor = VideoAutoEditor()
+    editor.videoMerge(handle)
+
+    # editor = VideoAutoEditor()
+    # editor.getVideoLen('11.MP4')
+
+    # handle = ['videoFade', 'clip.mp4', '2', 'clip_fadeout.mp4']
+    # editor = VideoAutoEditor()
+    # editor.videoFade(handle)
+
+    # handle = ['videoFade', 'clip_2.mp4', '1', 'clip_fadein.mp4']
+    # editor = VideoAutoEditor()
+    # editor.videoFade(handle)
+
+    # handle = ['merge', 'clip_fadeout.mp4', 'clip_fadein.mp4', 'outFile.mp4']
+    # editor = VideoAutoEditor()
+    # editor.videoMerge(handle)
 
     # handle = ['imgMoveScale', 'football.jpg', '5', 'output.mp4']
     # editor = VideoAutoEditor()
@@ -63,6 +87,7 @@ def test():
 def addMusic(strategyFile):
     # handle config
     config = getJson(strategyFile, "config")
+    isHasAudio = config.get('audio', "")
 
     if not ('musicFolder' in config.keys())  or '' == config['musicFolder']:
         return
@@ -81,9 +106,15 @@ def addMusic(strategyFile):
     # Add music
     if musicFile == None:
         return
-    listParam = ['addMusic', ouputFolder+'/product.mp4', musicFile, ouputFolder+'/../'+titleText+'.mp4']
-    editor = VideoAutoEditor()
-    editor.addMusic(listParam)
+
+    if isHasAudio == '' :
+        listParam = ['addMusic', ouputFolder+'/product.mp4', musicFile, ouputFolder+'/../'+titleText+'.mp4']
+        editor = VideoAutoEditor()
+        editor.addMusic(listParam)
+    else:
+        listParam = ['addMergeMusic', ouputFolder+'/product.mp4', musicFile, ouputFolder+'/../'+titleText+'.mp4']
+        editor = VideoAutoEditor()
+        editor.addMergeMusic(listParam)
 
 def buildCmd(cmd, param, inFile, outFile):
     cmdList = []
@@ -116,6 +147,9 @@ def handleAutoEdit(strategyFile):
 
 def parseStrategy(strategyFile):
     mergeList = ["videoMerge"]
+    mergeAudioList = ["videoMerge"]
+    videoAudioList = []
+    muteAduioFile = ''
     # mergeList = ["eachVideoMerge"]
     clipMergeList = []
     actionList = []
@@ -123,17 +157,20 @@ def parseStrategy(strategyFile):
     logoFile = ''
     titlePng = ''
     ouputFolder = ''
+    isHasAudio = ''
 
     # handle config
     config = getJson(strategyFile, "config")
     logoFile = config['logo']
     titlePng = config['title']
+    isHasAudio = config.get('audio', "")
     ouputFolder = os.path.realpath(config['ouputFolder'])
 
 
     # handle video clips
     strategy = getJson(strategyFile, "video_clips")
     nClip = 0
+    nLastClip = len(strategy)
     for clip in strategy:
         # some temp var
         nClip = nClip + 1
@@ -145,7 +182,11 @@ def parseStrategy(strategyFile):
         actions = clip['actions']
 
         isAddLogo = False
+        muteAduioFile = ''
+        nAction = 0
         for action in actions:
+            # some temp var
+            nAction = nAction + 1
             cmd = action["action"]
             if 'join' == cmd:
                 finalOutputFile = file
@@ -170,6 +211,26 @@ def parseStrategy(strategyFile):
                 outputFile = ouputFolder + "/clip_"+str(nClip)+"_format.mp4"
                 actionList.append(buildCmd("outputFormat", [], finalOutputFile, outputFile))
                 finalOutputFile = outputFile
+
+                # get audio from file
+                muteAduioFile = finalOutputFile
+
+            if 'cut_a' == cmd:
+                param = action["parameter"]
+
+                # videoCut
+                outputFile = ouputFolder + "/clip_"+str(nClip)+file[-4:]
+                param[1] = round(param[1] - param[0], 3)
+                actionList.append(buildCmd("videoCut_a", param, file, outputFile))
+                finalOutputFile = outputFile
+
+                # outputFormat
+                outputFile = ouputFolder + "/clip_"+str(nClip)+"_format.mp4"
+                actionList.append(buildCmd("outputFormat", [], finalOutputFile, outputFile))
+                finalOutputFile = outputFile
+
+                # get audio from file
+                muteAduioFile = finalOutputFile
 
             if 'addstar' == cmd:
                 param = action["parameter"]
@@ -253,8 +314,15 @@ def parseStrategy(strategyFile):
                 if param[0] == '':
                     continue
                 param[2] = param[1] + param[2]
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_pic.mp4"
+                outputFile = ouputFolder + "/clip_"+str(nClip)+"_pic_"+str(nAction)+".mp4"
                 actionList.append(buildCmd("PIP_imgOnVideo", param, finalOutputFile, outputFile))
+                finalOutputFile = outputFile
+
+            if 'fade_inout' == cmd:
+                param = action["parameter"]
+
+                outputFile = ouputFolder + "/clip_"+str(nClip)+"_fade.mp4"
+                actionList.append(buildCmd("videoFade", param, finalOutputFile, outputFile))
                 finalOutputFile = outputFile
 
         if isAddLogo and logoFile != '':
@@ -262,15 +330,38 @@ def parseStrategy(strategyFile):
             outputFile = ouputFolder + "/clip_"+str(nClip)+"_logo.mp4"
             actionList.append(buildCmd("videoLogo", [logoFile, '100'], finalOutputFile, outputFile))
             finalOutputFile = outputFile
+
+        # get audio file
+        if isHasAudio != '' :
+            audioOutputFile = ouputFolder + "/clip_"+str(nClip)+"_audio.mp3"
+            if muteAduioFile == '' :
+                actionList.append(buildCmd("creatMuteAudio", [], finalOutputFile, audioOutputFile))
+            else:
+                actionList.append(buildCmd("splitAudio", [], muteAduioFile, audioOutputFile))  
+            mergeAudioList.append(audioOutputFile)
         
         # clip finished, merge file
         # clipMergeList.append([finalOutputFile, mergeTime])
         # clipMergeList.append(finalOutputFile)
         # merge clip
         mergeList.append(finalOutputFile)
-    # gen product
-    finalOutputFile = ouputFolder + "/product.mp4"
-    mergeList.append(finalOutputFile)
+
+    if isHasAudio != '' :
+        # gen product
+        finalOutputFile = ouputFolder + "/product_video.mp4"
+        mergeList.append(finalOutputFile)
+
+        # gen product audio
+        audioOutputFile = ouputFolder + "/product_audio.mp3"
+        mergeAudioList.append(audioOutputFile)
+
+        # merge product video and audio
+        outputFile = ouputFolder + "/product.mp4"
+        videoAudioList = buildCmd("mergeAudio", [audioOutputFile], finalOutputFile, outputFile)
+    else :
+        # gen product
+        finalOutputFile = ouputFolder + "/product.mp4"
+        mergeList.append(finalOutputFile)
 
     # save JSON file
     json_object = {}
@@ -278,6 +369,9 @@ def parseStrategy(strategyFile):
     for item in actionList:
         json_object["action"].append(item)
     json_object["action"].append(mergeList)
+    if isHasAudio != '' :
+        json_object["action"].append(mergeAudioList)
+        json_object["action"].append(videoAudioList)
 
     with open(ouputFolder + "/autoEditor.json", "w", encoding='utf-8') as f:
         json.dump(json_object, f, indent=4, ensure_ascii=False)
@@ -347,7 +441,7 @@ def matchTime(videoTime, audioTime):
     # else:
     #     return False
 
-    if (videoTime < audioTime) and (audioTime - videoTime <= 2):
+    if (videoTime > audioTime) and (videoTime - audioTime <= 2):
         return True
     else:
         return False
@@ -381,8 +475,8 @@ def levelJson(jsonData, objLevel, curLevel=0):
         
 if __name__ == '__main__':
     # parseStrategy("E:/work/创业之路/音视频技术/科大讯飞/FFmpeg特效库/dev/strategy.json")
-    # parseStrategy("G:/视频剪辑/等级3/PIC_0035_进球/strategy.json")
-    # handleAutoEdit()
-    addMusic("G:/视频剪辑/2017-06-25-八喜vs鲁能/切片目录/主相机等级3\[1开场前0.00.37][等级3]/strategy.json")
+    parseStrategy("//Yiball-server/延十八比赛/等级3/[2上半场0.05.28][等级3][进球]/strategy.json")
+    handleAutoEdit("//Yiball-server/延十八比赛/等级3/[2上半场0.05.28][等级3][进球]/strategy.json")
+    addMusic("//Yiball-server/延十八比赛/等级3/[2上半场0.05.28][等级3][进球]/strategy.json")
     # test()
 

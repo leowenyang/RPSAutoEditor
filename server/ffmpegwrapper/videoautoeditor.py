@@ -68,7 +68,7 @@ class FFMpegFactory(object):
 
     def outputFormat(self):
         # Output
-        self.output.add_formatparam('-an', None)
+        #self.output.add_formatparam('-an', None)
         self.output.add_formatparam('-s', '1920x1080')
         self.output.add_formatparam('-r', '25')
         self.output.add_formatparam('-pix_fmt', 'yuv420p')
@@ -147,7 +147,7 @@ class FFMpegFactory(object):
         # Output
         strFilter = 'crop=%s:%s:%s:%s' % (width, height, x, y)
         self.output.add_formatparam('-filter_complex', strFilter)
-        self.outputFormat()
+        #self.outputFormat()
 
     def videoRotate(self, angle):
         # Output (以度表示)
@@ -160,12 +160,15 @@ class FFMpegFactory(object):
         self.input.add_formatparam('-i', '"'+imgFile+'"')
         
         # Output
+        self.output.add_formatparam('-c:v', 'libx264')
+        self.output.add_formatparam('-c:a', 'copy')
+        self.output.add_formatparam('-strict', '-2')
         strFilter = '[0:v]scale=180:80[logo];'\
                     '[1:v][logo]overlay=main_w-overlay_w-10:main_h-overlay_h-10[out]' 
 
         self.output.add_formatparam('-filter_complex', strFilter)
         self.output.add_formatparam('-map', '[out]')
-        self.mp4Format()
+
 
     def videoToOneImg(self, time):
         # Input
@@ -222,6 +225,16 @@ class FFMpegFactory(object):
                      % (start, end)
         self.output.add_formatparam('-filter_complex', strFilter)
         self.output.add_formatparam('-map', '[out]')
+
+    def videFadeIn(self, during):
+        # Output
+        strFilter = 'fade=t=in:st=0:d=%s' % (during)
+        self.output.add_formatparam('-filter_complex', strFilter)
+
+    def videoFadeOut(self, start):
+        # Output
+        strFilter = 'fade=t=out:st=%s' % (start)
+        self.output.add_formatparam('-filter_complex', strFilter)
 
     def videoSpeed(self, videoStart, videoEnd, slowStart, slowEnd, speed):
         # Input
@@ -280,23 +293,39 @@ class FFMpegFactory(object):
     def vidstabtransform(self):
         strFilter = 'vidstabtransform=input=mytransforms.trf:zoom=1:maxangle=3*PI/180:smoothing=30,unsharp=5:5:0.8:3:3:0.4'
         self.output.add_formatparam('-filter_complex', strFilter)
-        pass
-
 
     """
     Audio Handle
     """
-    def addMusic(self, music):
-        # # Input
-        # self.input.add_formatparam('-i', '"'+music+'"')
-        # # Output
-        # strFilter = '"[0:a][1:a]amix=duration=first,pan=stereo|c0<c0+c1|c1<c2+c3,pan=mono|c0=c0+c1[a]"'
-        # self.output.add_formatparam('-filter_complex', strFilter)
-        # self.output.add_formatparam('-map', '[a]')
-        # self.output.add_formatparam('-map', '1:v')
-        # self.mp4Format()
-        # self.output.add_formatparam('-ac', '2')
+    def addMergeMusic(self, music):
+        # Input
+        self.input.add_formatparam('-i', '"'+music+'"')
+        # Output
+        strFilter = '"[0:a][1:a]amix=duration=first,pan=stereo|c0<c0+c1|c1<c2+c3,pan=mono|c0=c0+c1[a]"'
+        # strFilter = '"[1:a]volume=1[a1];[0:a][a1]amix=inputs=2:duration=first:dropout_transition=0[a]"'
+        self.output.add_formatparam('-filter_complex', strFilter)
+        self.output.add_formatparam('-map_metadata', '-1')
+        self.output.add_formatparam('-map', '1:v')
+        self.output.add_formatparam('-map', '[a]')
+        self.mp4Format()
+        # self.output.add_formatparam('-shortest', None)
+        self.output.add_formatparam('-ac', '2')
+        self.output.add_formatparam('-b', '1.6M')
 
+    def splitAudio(self):
+        # Output
+        self.output.add_formatparam('-vn', None)
+
+    def mergeAudio(self, file):
+        # Input
+        self.input.add_formatparam('-i', '"'+file+'"')
+        # Output
+        self.output.add_formatparam('-map_metadata', '-1')
+        self.output.add_formatparam('-map', '1:v')
+        self.output.add_formatparam('-map', '0:a')
+        self.mp4Format()
+
+    def addMusic(self, music):
         # Input
         self.input.add_formatparam('-i', '"'+music+'"')
         # Output
@@ -304,8 +333,30 @@ class FFMpegFactory(object):
         self.output.add_formatparam('-map', '1:v:0')
         self.output.add_formatparam('-map', '0:a:0')
         self.mp4Format()
-        self.output.add_formatparam('-shortest', None)
+        # self.output.add_formatparam('-shortest', None)
         self.output.add_formatparam('-b', '1.6M')
+
+    def addNullAudio(self, nullFile):
+        # Input
+        self.input.add_formatparam('-i', '"'+nullFile+'"')
+        # Output
+        self.output.add_formatparam('-c:v', 'copy')
+        self.output.add_formatparam('-c:a', 'aac')
+        self.output.add_formatparam('-b:a', '128k')
+        self.output.add_formatparam('-ar', '48000')
+        self.output.add_formatparam('-ac', '2')
+        self.output.add_formatparam('-shortest', None)
+
+    def creatMuteAudio(self, during):
+        # Input
+        self.input.add_formatparam('-ss', '0')
+        self.input.add_formatparam('-accurate_seek', None)
+
+        
+        # Output
+        self.output.add_formatparam('-t', during)
+        self.output.add_formatparam('-avoid_negative_ts', '1')
+        self.output.add_formatparam('-seek2any', '1')
 
     def audioMute(self):
         # Output
@@ -380,7 +431,25 @@ class VideoAutoEditor():
         # handle
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         ffmpegManger.videoCut(listParam[2], listParam[3])
+        # check if Mute
         ffmpegManger.audioMute()
+        ffmpegManger.run()
+
+    def videoCut_a(self, listParam):
+        """
+        handle : ['videoCut_a', 'inFile', 'start', 'during', 'outFile']
+        """
+
+        # check Param
+        if len(listParam) != 5:
+            print(listParam)
+            print("COMMAND: videoCut_a -> param format invalid")
+            print("['videoCut_a', 'inFile', 'start', 'during', 'outFile']")
+            return
+        
+        # handle
+        ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
+        ffmpegManger.videoCut(listParam[2], listParam[3])
         ffmpegManger.run()
 
     def audioMute(self, listParam):
@@ -396,6 +465,22 @@ class VideoAutoEditor():
         # handle
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         ffmpegManger.audioMute()
+        ffmpegManger.run()
+
+    def creatMuteAudio(self, listParam):
+        """
+        handle : ['creatMuteAudio', 'inpFile', 'outFile']
+        """
+        # check Param
+        if len(listParam) != 3:
+            print("COMMAND: creatMuteAudio -> param format invalid")
+            print("['creatMuteAudio', 'inpFile', 'outFile']")
+            return
+
+        # handle
+        ffmpegManger = FFMpegFactory("./bin/null.mp3", listParam[-1])
+        videoLen = self.getVideoLen(listParam[1])
+        ffmpegManger.creatMuteAudio(videoLen)
         ffmpegManger.run()
 
     def eachVideoMerge(self, listParam):
@@ -631,6 +716,29 @@ class VideoAutoEditor():
         ffmpegManger.videoScale(listParam[2], listParam[3], listParam[4], listParam[5])
         ffmpegManger.run()
 
+    def videoFade(self, listParam):
+        """
+        handle : ['videoFade', 'videoFile', 'fadetype', 'outFile']
+        """
+        # check Param
+        if len(listParam) != 4:
+            print(listParam)
+            print("COMMAND: videoFade -> param format invalid")
+            print("['videoFade', 'videoFile', 'fadetype', 'outFile']")
+            return
+
+        # handle
+        ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
+        # check type
+        if listParam[2] == '1':
+            # fade in
+            ffmpegManger.videFadeIn(0.5)
+        else:
+            # fade out
+            videoLen = self.getVideoLen(listParam[1])
+            ffmpegManger.videoFadeOut(videoLen-0.5)
+        ffmpegManger.run()
+
     def videoRotate(self, listParam):
         """
         handle : ['videoRotate', 'videoFile', 'angle', 'outFile']
@@ -693,6 +801,22 @@ class VideoAutoEditor():
         ffmpegManger.imgMoveScale(listParam[2])
         ffmpegManger.run()
 
+    def mergeAudio(self, listParam):
+        """
+        handle : ['mergeAudio', 'videoFile', 'music', 'outFile']
+        """
+        # check Param
+        if len(listParam) != 4:
+            print(listParam)
+            print("COMMAND: mergeAudio -> param format invalid")
+            print("['mergeAudio', 'videoFile', 'audioFile', 'outFile']")
+            return
+
+        # handle
+        ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
+        ffmpegManger.mergeAudio(listParam[2])
+        ffmpegManger.run()
+
     def addMusic(self, listParam):
         """
         handle : ['addMusic', 'videoFile', 'music', 'outFile']
@@ -707,6 +831,55 @@ class VideoAutoEditor():
         # handle
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         ffmpegManger.addMusic(listParam[2])
+        ffmpegManger.run()
+
+    def addMergeMusic(self, listParam):
+        """
+        handle : ['addMergeMusic', 'videoFile', 'music', 'outFile']
+        """
+        # check Param
+        if len(listParam) != 4:
+            print(listParam)
+            print("COMMAND: addMergeMusic -> param format invalid")
+            print("['addMergeMusic', 'videoFile', 'music', 'outFile']")
+            return
+
+        # handle
+        ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
+        ffmpegManger.addMergeMusic(listParam[2])
+        ffmpegManger.run()
+
+    def splitAudio(self, listParam):
+        """
+        handle : ['splitAudio', 'videoFile', 'outFile']
+        """
+        # check Param
+        if len(listParam) != 3:
+            print(listParam)
+            print("COMMAND: splitAudio -> param format invalid")
+            print("['splitAudio', 'videoFile', 'outFile']")
+            return
+
+        # handle
+        ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
+        ffmpegManger.splitAudio()
+        ffmpegManger.run()
+
+
+    def addNullAudio(self, listParam):
+        """
+        handle : ['addNullAudio', 'videoFile', 'nullFile', 'outFile']
+        """
+        # check Param
+        if len(listParam) != 4:
+            print(listParam)
+            print("COMMAND: addNullAudio -> param format invalid")
+            print("['addNullAudio', 'videoFile', 'nullFile', 'outFile']")
+            return
+
+        # handle
+        ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
+        ffmpegManger.addNullAudio(listParam[2])
         ffmpegManger.run()
 
     def rmShaky(self, listParam):
