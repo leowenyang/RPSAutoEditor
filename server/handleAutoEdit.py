@@ -198,6 +198,9 @@ def parseStrategy(strategyFile):
                 else:
                     isAddLogo = True
 
+                # get audio from file
+                muteAduioFile = finalOutputFile
+
             if 'cut' == cmd:
                 param = action["parameter"]
 
@@ -313,7 +316,7 @@ def parseStrategy(strategyFile):
                 # add picture
                 if param[0] == '':
                     continue
-                param[2] = param[1] + param[2]
+                # param[2] = param[1] + param[2]
                 outputFile = ouputFolder + "/clip_"+str(nClip)+"_pic_"+str(nAction)+".mp4"
                 actionList.append(buildCmd("PIP_imgOnVideo", param, finalOutputFile, outputFile))
                 finalOutputFile = outputFile
@@ -321,7 +324,7 @@ def parseStrategy(strategyFile):
             if 'fade_inout' == cmd:
                 param = action["parameter"]
 
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_fade.mp4"
+                outputFile = ouputFolder + "/clip_"+str(nClip)+"_fade_"+str(nAction)+".mp4"
                 actionList.append(buildCmd("videoFade", param, finalOutputFile, outputFile))
                 finalOutputFile = outputFile
 
@@ -334,7 +337,7 @@ def parseStrategy(strategyFile):
         # get audio file
         if isHasAudio != '' :
             audioOutputFile = ouputFolder + "/clip_"+str(nClip)+"_audio.mp3"
-            if muteAduioFile == '' :
+            if checkVideoMute(muteAduioFile) :
                 actionList.append(buildCmd("creatMuteAudio", [], finalOutputFile, audioOutputFile))
             else:
                 actionList.append(buildCmd("splitAudio", [], muteAduioFile, audioOutputFile))  
@@ -376,6 +379,23 @@ def parseStrategy(strategyFile):
     with open(ouputFolder + "/autoEditor.json", "w", encoding='utf-8') as f:
         json.dump(json_object, f, indent=4, ensure_ascii=False)
                 
+
+def checkVideoMute(file):
+    item_list = None
+    cmd = '%s -i "%s"' % (os.path.join(os.path.abspath('.'), 'bin','ffmpeg.exe'),file)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    p.wait()
+    item_list = p.stdout.read().splitlines()
+
+    for i in range(len(item_list)):
+        try:
+            item = item_list[i].decode('utf-8')
+        except:
+            item = str(item_list[i])
+
+        if "Audio" in item:
+        	return False
+    return True
 
 def getAVDuration(file):
     '''

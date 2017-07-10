@@ -315,6 +315,9 @@ class FFMpegFactory(object):
     def splitAudio(self):
         # Output
         self.output.add_formatparam('-vn', None)
+        self.output.add_formatparam('-b:a', '128k')
+        self.output.add_formatparam('-ar', '48000')
+        self.output.add_formatparam('-ac', '2')
 
     def mergeAudio(self, file):
         # Input
@@ -357,6 +360,9 @@ class FFMpegFactory(object):
         self.output.add_formatparam('-t', during)
         self.output.add_formatparam('-avoid_negative_ts', '1')
         self.output.add_formatparam('-seek2any', '1')
+        self.output.add_formatparam('-b:a', '128k')
+        self.output.add_formatparam('-ar', '48000')
+        self.output.add_formatparam('-ac', '2')
 
     def audioMute(self):
         # Output
@@ -478,7 +484,7 @@ class VideoAutoEditor():
             return
 
         # handle
-        ffmpegManger = FFMpegFactory("./bin/null.mp3", listParam[-1])
+        ffmpegManger = FFMpegFactory(os.path.join(os.path.abspath('.'), 'bin','null.mp3'), listParam[-1])
         videoLen = self.getVideoLen(listParam[1])
         ffmpegManger.creatMuteAudio(videoLen)
         ffmpegManger.run()
@@ -730,7 +736,7 @@ class VideoAutoEditor():
         # handle
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         # check type
-        if listParam[2] == '1':
+        if listParam[2] == 1:
             # fade in
             ffmpegManger.videFadeIn(0.5)
         else:
