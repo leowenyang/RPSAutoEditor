@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='wxrpcauth.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x0fwxrpcauth.proto\"\x1b\n\x0b\x41uthRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1c\n\tAuthReply\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1d\n\nByteReplay\x12\x0f\n\x07message\x18\x01 \x01(\x0c\x32\x99\x02\n\x06wxAuth\x12\x30\n\x12\x63heckClientVersion\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\x30\n\x12\x63heckServerVersion\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\'\n\twxRPCAuth\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12*\n\x0bgetWxBotKey\x12\x0c.AuthRequest\x1a\x0b.ByteReplay\"\x00\x12(\n\ncheckWxBot\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12,\n\x0e\x43\x61llAutoEditor\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x0fwxrpcauth.proto\"\x1b\n\x0b\x41uthRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1c\n\tAuthReply\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1d\n\nByteReplay\x12\x0f\n\x07message\x18\x01 \x01(\x0c\x32\xcc\x02\n\x06wxAuth\x12\x30\n\x12\x63heckClientVersion\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\x31\n\x13\x63heckClient2Version\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\x30\n\x12\x63heckServerVersion\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\'\n\twxRPCAuth\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12*\n\x0bgetWxBotKey\x12\x0c.AuthRequest\x1a\x0b.ByteReplay\"\x00\x12(\n\ncheckWxBot\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12,\n\x0e\x43\x61llAutoEditor\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x62\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -169,6 +169,11 @@ try:
           request_serializer=AuthRequest.SerializeToString,
           response_deserializer=AuthReply.FromString,
           )
+      self.checkClient2Version = channel.unary_unary(
+          '/wxAuth/checkClient2Version',
+          request_serializer=AuthRequest.SerializeToString,
+          response_deserializer=AuthReply.FromString,
+          )
       self.checkServerVersion = channel.unary_unary(
           '/wxAuth/checkServerVersion',
           request_serializer=AuthRequest.SerializeToString,
@@ -201,6 +206,13 @@ try:
     """
 
     def checkClientVersion(self, request, context):
+      """wxAuth
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def checkClient2Version(self, request, context):
       """wxAuth
       """
       context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -250,6 +262,11 @@ try:
             request_deserializer=AuthRequest.FromString,
             response_serializer=AuthReply.SerializeToString,
         ),
+        'checkClient2Version': grpc.unary_unary_rpc_method_handler(
+            servicer.checkClient2Version,
+            request_deserializer=AuthRequest.FromString,
+            response_serializer=AuthReply.SerializeToString,
+        ),
         'checkServerVersion': grpc.unary_unary_rpc_method_handler(
             servicer.checkServerVersion,
             request_deserializer=AuthRequest.FromString,
@@ -293,6 +310,10 @@ try:
       """wxAuth
       """
       context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def checkClient2Version(self, request, context):
+      """wxAuth
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
     def checkServerVersion(self, request, context):
       """wxAuth
       """
@@ -328,6 +349,11 @@ try:
       """
       raise NotImplementedError()
     checkClientVersion.future = None
+    def checkClient2Version(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """wxAuth
+      """
+      raise NotImplementedError()
+    checkClient2Version.future = None
     def checkServerVersion(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
       """wxAuth
       """
@@ -363,6 +389,7 @@ try:
     generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
     request_deserializers = {
       ('wxAuth', 'CallAutoEditor'): AuthRequest.FromString,
+      ('wxAuth', 'checkClient2Version'): AuthRequest.FromString,
       ('wxAuth', 'checkClientVersion'): AuthRequest.FromString,
       ('wxAuth', 'checkServerVersion'): AuthRequest.FromString,
       ('wxAuth', 'checkWxBot'): AuthRequest.FromString,
@@ -371,6 +398,7 @@ try:
     }
     response_serializers = {
       ('wxAuth', 'CallAutoEditor'): AuthReply.SerializeToString,
+      ('wxAuth', 'checkClient2Version'): AuthReply.SerializeToString,
       ('wxAuth', 'checkClientVersion'): AuthReply.SerializeToString,
       ('wxAuth', 'checkServerVersion'): AuthReply.SerializeToString,
       ('wxAuth', 'checkWxBot'): AuthReply.SerializeToString,
@@ -379,6 +407,7 @@ try:
     }
     method_implementations = {
       ('wxAuth', 'CallAutoEditor'): face_utilities.unary_unary_inline(servicer.CallAutoEditor),
+      ('wxAuth', 'checkClient2Version'): face_utilities.unary_unary_inline(servicer.checkClient2Version),
       ('wxAuth', 'checkClientVersion'): face_utilities.unary_unary_inline(servicer.checkClientVersion),
       ('wxAuth', 'checkServerVersion'): face_utilities.unary_unary_inline(servicer.checkServerVersion),
       ('wxAuth', 'checkWxBot'): face_utilities.unary_unary_inline(servicer.checkWxBot),
@@ -397,6 +426,7 @@ try:
     generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
     request_serializers = {
       ('wxAuth', 'CallAutoEditor'): AuthRequest.SerializeToString,
+      ('wxAuth', 'checkClient2Version'): AuthRequest.SerializeToString,
       ('wxAuth', 'checkClientVersion'): AuthRequest.SerializeToString,
       ('wxAuth', 'checkServerVersion'): AuthRequest.SerializeToString,
       ('wxAuth', 'checkWxBot'): AuthRequest.SerializeToString,
@@ -405,6 +435,7 @@ try:
     }
     response_deserializers = {
       ('wxAuth', 'CallAutoEditor'): AuthReply.FromString,
+      ('wxAuth', 'checkClient2Version'): AuthReply.FromString,
       ('wxAuth', 'checkClientVersion'): AuthReply.FromString,
       ('wxAuth', 'checkServerVersion'): AuthReply.FromString,
       ('wxAuth', 'checkWxBot'): AuthReply.FromString,
@@ -413,6 +444,7 @@ try:
     }
     cardinalities = {
       'CallAutoEditor': cardinality.Cardinality.UNARY_UNARY,
+      'checkClient2Version': cardinality.Cardinality.UNARY_UNARY,
       'checkClientVersion': cardinality.Cardinality.UNARY_UNARY,
       'checkServerVersion': cardinality.Cardinality.UNARY_UNARY,
       'checkWxBot': cardinality.Cardinality.UNARY_UNARY,

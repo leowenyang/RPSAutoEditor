@@ -86,17 +86,39 @@ def test():
 
 def addMusic(strategyFile):
     # handle config
+    resultFile = ''
     config = getJson(strategyFile, "config")
     isHasAudio = config.get('audio', "")
 
-    if not ('musicFolder' in config.keys())  or '' == config['musicFolder']:
-        return
-
     ouputFolder = os.path.realpath(config['ouputFolder'])
     musicFolder = os.path.realpath(config['musicFolder'])
-    titleText = config['title_text']
-    if len(titleText) == 0:
-        titleText = "product_music"
+    titleText = config.get('title_text', "")
+
+    videoType = config.get('videoType', "")
+    if videoType == "1":
+        # xiaopian
+        if len(titleText) == 0:
+            titleText = "product_music"
+        resultFile = ouputFolder+'/../'+titleText+'.mp4'
+
+    elif videoType == "2":
+        # jijinsucai
+        # create temp fold
+        tmpSaveFolder = ouputFolder+'/../../集锦'
+        if not os.path.exists(tmpSaveFolder):
+            os.mkdir(tmpSaveFolder)
+        # copy file
+        # print(ouputFolder.split('\\')[-2])
+        tmpFileName = os.path.join(tmpSaveFolder, ouputFolder.split('\\')[-2]+'.mp4')
+        shutil.copyfile(os.path.join(ouputFolder, 'product.mp4'), tmpFileName)
+    elif videoType == "3":
+        # jijin
+        resultFile = ouputFolder+'/../'+'全场集锦.mp4'
+    else:
+        return
+
+    if not ('musicFolder' in config.keys())  or '' == config['musicFolder']:
+        return
 
     # 1. get video length
     videoTime = getAVDuration(ouputFolder+"/product.mp4")
@@ -108,13 +130,21 @@ def addMusic(strategyFile):
         return
 
     if isHasAudio == '' :
-        listParam = ['addMusic', ouputFolder+'/product.mp4', musicFile, ouputFolder+'/../'+titleText+'.mp4']
+        listParam = ['addMusic', ouputFolder+'/product.mp4', musicFile, resultFile]
         editor = VideoAutoEditor()
         editor.addMusic(listParam)
     else:
-        listParam = ['addMergeMusic', ouputFolder+'/product.mp4', musicFile, ouputFolder+'/../'+titleText+'.mp4']
+        listParam = ['addMergeMusic', ouputFolder+'/product.mp4', musicFile, resultFile]
         editor = VideoAutoEditor()
         editor.addMergeMusic(listParam)
+
+    if videoType == "1":
+        # Save other folder
+        tmpSaveFolder = ouputFolder+'/../../小片'
+        if not os.path.exists(tmpSaveFolder):
+            os.mkdir(tmpSaveFolder)
+        # copy file
+        shutil.copyfile(resultFile, os.path.join(tmpSaveFolder, os.path.basename(resultFile)))
 
 def buildCmd(cmd, param, inFile, outFile):
     cmdList = []
@@ -182,6 +212,7 @@ def parseStrategy(strategyFile):
         actions = clip['actions']
 
         isAddLogo = False
+        isCutWithAudio = False
         muteAduioFile = ''
         nAction = 0
         for action in actions:
@@ -217,6 +248,7 @@ def parseStrategy(strategyFile):
 
                 # get audio from file
                 muteAduioFile = finalOutputFile
+                isCutWithAudio = False
 
             if 'cut_a' == cmd:
                 param = action["parameter"]
@@ -234,6 +266,7 @@ def parseStrategy(strategyFile):
 
                 # get audio from file
                 muteAduioFile = finalOutputFile
+                isCutWithAudio = True
 
             if 'addstar' == cmd:
                 param = action["parameter"]
@@ -337,7 +370,7 @@ def parseStrategy(strategyFile):
         # get audio file
         if isHasAudio != '' :
             audioOutputFile = ouputFolder + "/clip_"+str(nClip)+"_audio.mp3"
-            if checkVideoMute(muteAduioFile) :
+            if checkVideoMute(file) or not isCutWithAudio:
                 actionList.append(buildCmd("creatMuteAudio", [], finalOutputFile, audioOutputFile))
             else:
                 actionList.append(buildCmd("splitAudio", [], muteAduioFile, audioOutputFile))  
@@ -394,7 +427,7 @@ def checkVideoMute(file):
             item = str(item_list[i])
 
         if "Audio" in item:
-        	return False
+            return False
     return True
 
 def getAVDuration(file):
@@ -495,8 +528,9 @@ def levelJson(jsonData, objLevel, curLevel=0):
         
 if __name__ == '__main__':
     # parseStrategy("E:/work/创业之路/音视频技术/科大讯飞/FFmpeg特效库/dev/strategy.json")
-    parseStrategy("//Yiball-server/延十八比赛/等级3/[2上半场0.05.28][等级3][进球]/strategy.json")
-    handleAutoEdit("//Yiball-server/延十八比赛/等级3/[2上半场0.05.28][等级3][进球]/strategy.json")
-    addMusic("//Yiball-server/延十八比赛/等级3/[2上半场0.05.28][等级3][进球]/strategy.json")
+    parseStrategy("H:/auto_tool_test/strategy.json")
+    handleAutoEdit("H:/auto_tool_test/strategy.json")
+    # addMusic("H:/auto_tool_test/strategy.json")
     # test()
+    # print(checkVideoMute("H:/auto_tool_test/output/"))
 

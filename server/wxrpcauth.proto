@@ -6,6 +6,9 @@ service wxAuth {
   rpc checkClientVersion (AuthRequest) returns (AuthReply) {}
 
   // wxAuth
+  rpc checkClient2Version (AuthRequest) returns (AuthReply) {}
+
+  // wxAuth
   rpc checkServerVersion (AuthRequest) returns (AuthReply) {}
 
   // wxAuth

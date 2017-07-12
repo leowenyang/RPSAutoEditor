@@ -59,6 +59,13 @@ class wxClient(object):
         else:
             return response.message
 
+    def checkVersion_2(self, version):
+        response = self.stub.checkClient2Version(wxrpcauth_pb2.AuthRequest(name=version))
+        if response.message == "OK":
+            return "OK"
+        else:
+            return response.message
+
     def checkWxUser(self):
         response = self.stub.getWxBotKey(wxrpcauth_pb2.AuthRequest(name=''))
         # print(response.message)

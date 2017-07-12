@@ -16,11 +16,13 @@ _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 AUTHSERVER_VERSION = "1.0.0"
 CLIENT_VERSION = ""
+CLIENT2_VERSION = ""
 SERVER_VERSION = ""
 # get version
 with open("config.conf", encoding='utf-8') as f:
     json_object = json.load(f)
     CLIENT_VERSION = json_object['clientVersion']
+    CLIENT2_VERSION = json_object['client2Version']
     SERVER_VERSION = json_object['serverVersion']
 
 
@@ -30,6 +32,11 @@ class ServerServicer(wxrpcauth_pb2.wxAuthServicer):
         if request.name == CLIENT_VERSION:
             return wxrpcauth_pb2.AuthReply(message="OK")
         return wxrpcauth_pb2.AuthReply(message=CLIENT_VERSION)
+
+    def checkClient2Version(self, request, context):
+        if request.name == CLIENT2_VERSION:
+            return wxrpcauth_pb2.AuthReply(message="OK")
+        return wxrpcauth_pb2.AuthReply(message=CLIENT2_VERSION)
 
     def checkServerVersion(self, request, context):
         if request.name == SERVER_VERSION:

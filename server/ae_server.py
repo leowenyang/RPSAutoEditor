@@ -14,7 +14,7 @@ import json
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
-SERVER_VERSION = "1.0.4"
+SERVER_VERSION = "1.0.5"
 
 def save2File(file, content):
     with open(file, "a", encoding='utf-8') as f:
@@ -71,16 +71,23 @@ def main():
         tips= "ERROR!!! Please upgrade program to %s" % result
         input(tips)
 
-	
+    
 def serve():
     port = '1337'
+    
+    try:
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
+        wxrpcauth_pb2.add_wxAuthServicer_to_server(ServerServicer(), server)
+        server.add_insecure_port('[::]:'+port)
+        server.start()
+    except Exception as e:
+        print(e)
+        input('无法连接到验证服务器，请联系开发人员，按回车键退出。。。')
+        return
 
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
-    wxrpcauth_pb2.add_wxAuthServicer_to_server(ServerServicer(), server)
-    server.add_insecure_port('[::]:'+port)
-    server.start()
     print('current version is %s' %(SERVER_VERSION))
     print('AE server is running ...')
+
     try:
         while True:
             time.sleep(_ONE_DAY_IN_SECONDS)

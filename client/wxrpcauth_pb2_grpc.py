@@ -19,6 +19,11 @@ class wxAuthStub(object):
         request_serializer=wxrpcauth__pb2.AuthRequest.SerializeToString,
         response_deserializer=wxrpcauth__pb2.AuthReply.FromString,
         )
+    self.checkClient2Version = channel.unary_unary(
+        '/wxAuth/checkClient2Version',
+        request_serializer=wxrpcauth__pb2.AuthRequest.SerializeToString,
+        response_deserializer=wxrpcauth__pb2.AuthReply.FromString,
+        )
     self.checkServerVersion = channel.unary_unary(
         '/wxAuth/checkServerVersion',
         request_serializer=wxrpcauth__pb2.AuthRequest.SerializeToString,
@@ -51,6 +56,13 @@ class wxAuthServicer(object):
   """
 
   def checkClientVersion(self, request, context):
+    """wxAuth
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def checkClient2Version(self, request, context):
     """wxAuth
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -97,6 +109,11 @@ def add_wxAuthServicer_to_server(servicer, server):
   rpc_method_handlers = {
       'checkClientVersion': grpc.unary_unary_rpc_method_handler(
           servicer.checkClientVersion,
+          request_deserializer=wxrpcauth__pb2.AuthRequest.FromString,
+          response_serializer=wxrpcauth__pb2.AuthReply.SerializeToString,
+      ),
+      'checkClient2Version': grpc.unary_unary_rpc_method_handler(
+          servicer.checkClient2Version,
           request_deserializer=wxrpcauth__pb2.AuthRequest.FromString,
           response_serializer=wxrpcauth__pb2.AuthReply.SerializeToString,
       ),
