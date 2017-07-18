@@ -231,6 +231,7 @@ def parseStrategy(strategyFile):
 
                 # get audio from file
                 muteAduioFile = finalOutputFile
+                isCutWithAudio = True
 
             if 'cut' == cmd:
                 param = action["parameter"]
@@ -267,6 +268,14 @@ def parseStrategy(strategyFile):
                 # get audio from file
                 muteAduioFile = finalOutputFile
                 isCutWithAudio = True
+
+            if 'format' == cmd:
+                param = action["parameter"]
+
+                # outputFormat
+                outputFile = ouputFolder + "/clip_"+str(nClip)+"_mp4format.mp4"
+                actionList.append(buildCmd("outputFormat", [], finalOutputFile, outputFile))
+                finalOutputFile = outputFile
 
             if 'addstar' == cmd:
                 param = action["parameter"]
@@ -528,9 +537,9 @@ def levelJson(jsonData, objLevel, curLevel=0):
         
 if __name__ == '__main__':
     # parseStrategy("E:/work/创业之路/音视频技术/科大讯飞/FFmpeg特效库/dev/strategy.json")
-    parseStrategy("H:/auto_tool_test/strategy.json")
-    handleAutoEdit("H:/auto_tool_test/strategy.json")
-    # addMusic("H:/auto_tool_test/strategy.json")
+    parseStrategy("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
+    handleAutoEdit("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
+    addMusic("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
     # test()
     # print(checkVideoMute("H:/auto_tool_test/output/"))
 

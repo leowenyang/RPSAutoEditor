@@ -147,7 +147,7 @@ class FFMpegFactory(object):
         # Output
         strFilter = 'crop=%s:%s:%s:%s' % (width, height, x, y)
         self.output.add_formatparam('-filter_complex', strFilter)
-        #self.outputFormat()
+        self.outputFormat()
 
     def videoRotate(self, angle):
         # Output (以度表示)

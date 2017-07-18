@@ -14,7 +14,7 @@ import json
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
-SERVER_VERSION = "1.0.5"
+SERVER_VERSION = "1.0.7"
 
 def save2File(file, content):
     with open(file, "a", encoding='utf-8') as f:
@@ -46,7 +46,9 @@ class wxClient(object):
             channel = grpc.insecure_channel('{}:{}'.format(host, self.port))
             self.stub = wxrpcauth_pb2.wxAuthStub(channel)
         except Exception as e:
-            raise e
+            print(e)
+            input('无法连接到验证服务器，请联系开发人员，按回车键退出。。。')
+            return
 
     def checkVersion(self, version):
         response = self.stub.checkServerVersion(wxrpcauth_pb2.AuthRequest(name=version))
