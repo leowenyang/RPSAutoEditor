@@ -7,6 +7,8 @@ import grpc
 import client.wxrpcauth_pb2 as wxrpcauth_pb2
 from client.wxlogin_client import *
 from client.taskqueue.taskqueue import Queue, Task
+import os
+import json
 
 from pkg_resources import *
 
@@ -17,23 +19,48 @@ class AEClient(object):
   def __init__(self, host):
     super(AEClient, self).__init__()
     self.port = '1337'
+    self.host = host
     # new threads
-    self.queue = Queue(workers=10)
-
+    self.queue = Queue(workers=1)
     # http connect
     try:
-        channel = grpc.insecure_channel('{}:{}'.format(host, self.port))
+        channel = grpc.insecure_channel('{}:{}'.format(self.host, self.port))
         self.stub = wxrpcauth_pb2.wxAuthStub(channel)
     except Exception as e:
+        print("RPC error")
         raise e
 
   def callAutoEditor(self, file):
     response = self.stub.CallAutoEditor(wxrpcauth_pb2.AuthRequest(name=file))
     print(response.message)
+    a,b = os.path.split(response.message)
+    tasks = []
+    task_status_json = os.path.join(os.path.abspath('.'), "task_status.json")
+    if(os.path.exists(task_status_json)):
+        with open(task_status_json, encoding='utf-8') as f:
+            tasks = json.load(f)
+            f.close()
+    for t in tasks:
+        if(a in t['task'] and b in t['task'] and t['status'] == '已提交'):
+            t['status'] = '已完成'
+            break
+
+    with open(task_status_json, "w", encoding = 'utf-8') as f:
+        f.write(json.dumps(tasks, ensure_ascii = False, indent = 4))
+        f.close()
 
   def run(self, file):
-    self.queue.add(self.callAutoEditor, file)
-    print ("run")
+    # threading is stop, new one
+    if self.queue.dying:
+        self.queue = Queue(workers=1)
+
+    try:
+        return self.queue.add(self.callAutoEditor, file)
+    except Exception as e:
+        raise e;
+
+  def cancelWaiting(self, file):
+    return self.queue.cancelTask(self.callAutoEditor, file)
 
   def waitFinished(self):
     for task in self.queue.finished:

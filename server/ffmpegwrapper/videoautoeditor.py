@@ -152,7 +152,15 @@ class FFMpegFactory(object):
     def videoRotate(self, angle):
         # Output (以度表示)
         strFilter = 'rotate=-(%s*PI/180)' % (angle)
-        self.output.add_formatparam('-filter_complex', strFilter)      
+        self.output.add_formatparam('-filter_complex', strFilter)
+
+    def videoCBS(self, contrast=1, brightness=0, saturation=1):
+        # contrast -2.0 to 2.0. The default value is "1".
+        # brightness -1.0 to 1.0. The default value is "0".
+        # saturation 0.0 to 3.0. The default value is "1".
+        # Output
+        strFilter = 'eq=contrast=%s:brightness=%s:saturation=%s' % (contrast, brightness, saturation)
+        self.output.add_formatparam('-filter_complex', strFilter)
 
     def videoLogo(self, imgFile):
         #filter_complex "overlay=0:0:enable=between(t,0,2)"
@@ -314,6 +322,8 @@ class FFMpegFactory(object):
 
     def splitAudio(self):
         # Output
+        strFilter = 'volume=3'
+        self.output.add_formatparam('-filter_complex', strFilter)
         self.output.add_formatparam('-vn', None)
         self.output.add_formatparam('-b:a', '128k')
         self.output.add_formatparam('-ar', '48000')
@@ -564,6 +574,21 @@ class VideoAutoEditor():
         # handle
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         ffmpegManger.videoOverlayVideo(listParam[2])
+        ffmpegManger.run()
+
+    def videoCBS(self, listParam):
+        """
+        handle : ['videoCBS', 'inFile', 'contrast', 'brightness', 'saturation', 'outFile']
+        """
+        # check Param
+        if len(listParam) != 6:
+            print("COMMAND: videoCBS -> param format invalid")
+            print("['videoCBS', 'inFile', 'contrast', 'brightness', 'saturation', 'outFile']")
+            return
+
+        # handle
+        ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
+        ffmpegManger.videoCBS(listParam[2], listParam[3], listParam[4])
         ffmpegManger.run()
 
     def videoToOneImg(self, listParam):

@@ -8,18 +8,31 @@ import subprocess
 from ffmpegwrapper.videoautoeditor import *
 from ffmpegwrapper.timerCounter import *
 
+from clipData import *
+
 def test():
-    handle = ['outputFormat', 'H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.01.34][等级3][进球]/11.主相机.MP4', 'test.mp4']
+    # handle = ['splitAudio', '04.mp4', '04.mp3']
+    # editor = VideoAutoEditor()
+    # editor.splitAudio(handle)
+    
+    # 'contrast', 'brightness', 'saturation'
+    handle = ['videoCBS', '04.mp4', '1', '0', '1', '04_color.mp4']
     editor = VideoAutoEditor()
-    editor.outputFormat(handle)
+    editor.videoCBS(handle)
 
-    handle = ['addNullAudio', 'clip_fadein.mp4', 'null.mp3', 'clip_fadein_out.mp4']
-    editor = VideoAutoEditor()
-    editor.addNullAudio(handle)
+    
 
-    handle = ['merge', 'clip_fadein_out.mp4', 'test.mp4', 'outFile.mp4']
-    editor = VideoAutoEditor()
-    editor.videoMerge(handle)
+    # handle = ['outputFormat', 'H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.01.34][等级3][进球]/11.主相机.MP4', 'test.mp4']
+    # editor = VideoAutoEditor()
+    # editor.outputFormat(handle)
+
+    # handle = ['addNullAudio', 'clip_fadein.mp4', 'null.mp3', 'clip_fadein_out.mp4']
+    # editor = VideoAutoEditor()
+    # editor.addNullAudio(handle)
+
+    # handle = ['merge', 'clip_fadein_out.mp4', 'test.mp4', 'outFile.mp4']
+    # editor = VideoAutoEditor()
+    # editor.videoMerge(handle)
 
     # editor = VideoAutoEditor()
     # editor.getVideoLen('11.MP4')
@@ -174,6 +187,370 @@ def handleAutoEdit(strategyFile):
     # counter time
     timerCounter.end()
     print("total spend %s s" % (timerCounter.diff()[0]))
+
+def findClipDataByhash(hash, clipData):
+    for clip in clipData:
+        if hash == clip['inVideoFileHash']:
+            return clip
+    return False
+
+def diffAutoEditorFile(newFile, oldFile):
+    # new diff json file
+    if os.path.exists(os.path.join(os.path.dirname(newFile),"autoEditor_diff.json")):
+        os.remove(os.path.join(os.path.dirname(newFile),"autoEditor_diff.json"))
+
+    diffJson = getJson(os.path.join(os.path.dirname(newFile),"autoEditor.json"))
+    oldJson = getJson(oldFile, "clips_handle")
+
+    for clip in diffJson['clips_handle']:
+        oldClip = findClipDataByhash(clip['inVideoFileHash'], oldJson)
+
+        if not oldClip:
+            continue
+        if ((oldClip['actionsHash'] == clip['actionsHash']) 
+           and (clip['isMerge'] == '0')):
+            # set no handle
+            diffJson['clips_handle'][diffJson['clips_handle'].index(clip)]['noChange'] = '1'
+
+    with open(os.path.join(os.path.dirname(newFile),"autoEditor_diff.json"), "w", encoding='utf-8') as f:
+        json.dump(diffJson, f, indent=4, ensure_ascii=False)
+    return os.path.join(os.path.dirname(newFile),"autoEditor_diff.json")
+
+def handleAutoEdit_new(strategyFile):
+    # counter time
+    timerCounter = CountingTimer()
+    timerCounter.begin()
+
+    # handle config
+    config = getJson(strategyFile, "config")
+    ouputFolder = os.path.realpath(config['ouputFolder'])
+
+    # check autoEditor file
+    if os.path.exists(ouputFolder + "/autoEditor_old.json"):
+        handleAEFile = diffAutoEditorFile(ouputFolder+"/autoEditor.json", ouputFolder + "/autoEditor_old.json")
+    else:
+        handleAEFile = ouputFolder+"/autoEditor.json"
+
+    editor = VideoAutoEditor()
+    clips = getJson(handleAEFile, "clips_handle")
+    for clip in clips:
+        if clip['noChange'] == '1':
+            continue
+        for action in clip['actions']:
+            editor.handleCmd(action)
+
+    # counter time
+    timerCounter.end()
+    print("total spend %s s" % (timerCounter.diff()[0]))
+
+def parseStrategy_new(strategyFile):
+    clipDataList = []
+    # handle config
+    config = getJson(strategyFile, "config")
+    logoFile = config.get('logo', "")
+    titlePng = config.get('title', "")
+    isHasAudio = config.get('audio', "")
+    ouputFolder = os.path.realpath(config['ouputFolder'])
+
+    # handle video clips
+    clips = getJson(strategyFile, "video_clips")
+    for clip in clips:
+        # get info from JSON file
+        file = clip.get('file', "")
+        actions = clip.get('actions', "")
+        baseName = os.path.basename(file)
+
+        # new clipData
+        clipData = ClipData(file)
+        outputFile = ''
+        finalOutputFile = file
+
+        nAction = 0
+        isCutWithAudio = True
+        muteAduioFile = ''
+        for action in actions:
+            nAction = nAction + 1
+            # get action info
+            cmd = action.get('action', "")
+            param = action.get('parameter', "")
+
+            if 'join' == cmd:
+                # get audio
+                clipData.setOutAudioFile(file)
+            if 'cut' == cmd:
+                # videoCut
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_cut"+str(nAction)+baseName[-4:])
+                param[1] = round(param[1] - param[0], 3)
+                clipData.addAction(actionCut(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                clipData.setVideoFileHash(file+str(param[0])+str(param[1]))
+                finalOutputFile = outputFile
+
+                # outputFormat
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nAction)+baseName[-4:])
+                clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                clipData.setOutAudioFile(outputFile)
+                finalOutputFile = outputFile
+
+                # no Audio
+                isCutWithAudio = False
+            if 'cut_a' == cmd:
+                # videoCut
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_cut_a"+str(nAction)+baseName[-4:])
+                param[1] = round(param[1] - param[0], 3)
+                clipData.addAction(actionCut_a(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                clipData.setVideoFileHash(file+str(param[0])+str(param[1]))
+                finalOutputFile = outputFile
+
+                # outputFormat
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nAction)+baseName[-4:])
+                clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                clipData.setOutAudioFile(outputFile)
+                finalOutputFile = outputFile
+
+                # have Audio
+                isCutWithAudio = True
+            if 'format' == cmd:
+                # outputFormat
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+baseName[-4:])
+                clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'addstar' == cmd:
+                lastOutputFile = finalOutputFile
+
+                # videoToOneImg
+                param = []
+                param.append(mergeList[-1])
+                param.append('-0.1')
+                outputFile = os.path.join(ouputFolder, "/clip_"+str(nClip)+".png")
+                clipData.addAction(functionVideoEndOnImg(finalOutputFile, outputFile, [lastOutputFile]))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+
+                # PIP_videoOnImg
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_pip"+baseName[-4:])
+                clipData.addAction(actionVideoOnImg(finalOutputFile, outputFile, [lastOutputFile]))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'rotate' == cmd:
+                # videoRotate
+                if param[0] == 0:
+                    continue
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_rotate"+baseName[-4:])
+                clipData.addAction(actionRotate(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'select_range' == cmd:
+                # videoScale
+                if param[0] == 0 and param[1] == 0 and param[2] == 1920 and param[3] == 1080:
+                    continue
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_range"+baseName[-4:])
+                clipData.addAction(actionScale(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'camera_move' == cmd:
+                # cameraMove
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_camera"+baseName[-4:])
+                clipData.addAction(actionCameraMove(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+
+                # rmShaky
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_rmshaky"+baseName[-4:])
+                clipData.addAction(actionRmShaky(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'slow_motion' == cmd:
+                # videoSpeed
+                if param[4] == 1:
+                    continue
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_slow"+baseName[-4:])
+                clipData.addAction(actionSpeed(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'add_subtitle' == cmd:
+                # add subtitle
+                if param[0] != 1:
+                    continue
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_subtitle"+baseName[-4:])
+                param = []
+                param.append(titlePng)
+                param.append('1')
+                param.append('3')
+                clipData.addAction(actionImgOnVideo(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'add_pic' == cmd:
+                # add picture
+                if param[0] == '':
+                    continue
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_pic"+str(nAction)+baseName[-4:])
+                clipData.addAction(actionImgOnVideo(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'fade_inout' == cmd:
+                # videoFade
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_fadeinout"+baseName[-4:])
+                clipData.addAction(actionFade(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+
+        if logoFile != '':
+            # videoLogo
+            outputFile = os.path.join(ouputFolder, baseName[:-4]+"_logo"+baseName[-4:])
+            clipData.addAction(actionLogo(finalOutputFile, outputFile, [logoFile, '100']))
+            clipData.setOutVideoFile(outputFile)
+            # clipData.setOutAudioFile()
+            finalOutputFile = outputFile
+
+        # get audio file
+        if isHasAudio != '' :
+            audioOutputFile = os.path.join(ouputFolder, baseName[:-4]+"_audio.mp3")
+            if checkVideoMute(file) or not isCutWithAudio:
+                clipData.addAction(actionCreateMuteAudio(clipData.outAudioFile, audioOutputFile, []))
+            else:
+                clipData.addAction(actionSplitAudio(clipData.outAudioFile, audioOutputFile, []))  
+            clipData.setOutAudioFile(audioOutputFile)
+
+        # append list
+        clipData.setActionsHash()
+        clipDataList.append(clipData)
+
+    # general merge file
+    if isHasAudio != '' :
+        # gen product
+        mergeList = ["videoMerge"]
+        outputFile = os.path.join(ouputFolder, "product_video.mp4")
+        clipData = ClipData(outputFile)
+        for clip in clipDataList:
+            mergeList.append(clip.outVideoFile)
+        mergeList.append(outputFile)
+        clipData.addAction(mergeList)
+        clipData.setOutVideoFile(outputFile)
+        clipData.setActionsHash()
+        clipData.setMergeFlag()
+        clipDataList.append(clipData)
+        finalOutputFile = outputFile
+
+
+        # gen product audio
+        mergeList = ["videoMerge"]
+        outputFile = os.path.join(ouputFolder, "product_audio.mp3")
+        clipData = ClipData(outputFile)
+        for clip in clipDataList:
+            if clip.outAudioFile == '':
+                continue
+            mergeList.append(clip.outAudioFile)
+        mergeList.append(outputFile)
+        clipData.addAction(mergeList)
+        clipData.setOutVideoFile(outputFile)
+        clipData.setActionsHash()
+        clipData.setMergeFlag()
+        clipDataList.append(clipData)
+        audioOutputFile = outputFile
+
+        # merge product video and audio
+        outputFile = os.path.join(ouputFolder, "product.mp4")
+        clipData = ClipData(outputFile)
+        clipData.addAction(actionMergeAudio(finalOutputFile, outputFile, [audioOutputFile]))
+        clipData.setOutVideoFile(outputFile)
+        clipData.setMergeFlag()
+        clipDataList.append(clipData)
+    else:
+        mergeList = ["videoMerge"]
+        outputFile = os.path.join(ouputFolder, "product.mp4")
+        clipData = ClipData(outputFile)
+        for clip in clipDataList:
+            mergeList.append(clip.outVideoFile)
+        mergeList.append(outputFile)
+        clipData.addAction(mergeList)
+        clipData.setOutVideoFile(outputFile)
+        clipData.setActionsHash()
+        clipDataList.append(clipData)
+        # clipData.setOutAudioFile()
+        clipData.setMergeFlag()
+        finalOutputFile = outputFile
+
+    # save JSON file
+    json_object = {}
+    json_object["clips_handle"] = []
+    for clip in clipDataList:
+        json_object["clips_handle"].append(clip.__dict__)
+
+    if os.path.exists(ouputFolder + "/autoEditor.json"):
+        if os.path.exists(ouputFolder + "/autoEditor_old.json"):
+            os.remove(ouputFolder + "/autoEditor_old.json")
+        os.rename(ouputFolder + "/autoEditor.json", ouputFolder + "/autoEditor_old.json")
+ 
+    with open(ouputFolder + "/autoEditor.json", "w", encoding='utf-8') as f:
+        json.dump(json_object, f, indent=4, ensure_ascii=False)
+
+def actionCreateMuteAudio(inFile, outFile, param):
+    return buildCmd("creatMuteAudio", param, inFile, outFile)
+
+def actionSplitAudio(inFile, outFile, param):
+    return buildCmd("splitAudio", param, inFile, outFile)
+
+def actionMergeAudio(inFile, outFile, param):
+    return buildCmd("mergeAudio", param, inFile, outFile)
+
+def actionCut(inFile, outFile, param):
+    # videoCut
+    return buildCmd("videoCut", param, inFile, outFile)
+
+def actionCut_a(inFile, outFile, param):
+    # videoCut
+    return buildCmd("videoCut_a", param, inFile, outFile)
+
+def actionRotate(inFile, outFile, param):
+    return buildCmd("videoRotate", param, inFile, outFile)
+
+def actionFormat(inFile, outFile, param):
+    return buildCmd("outputFormat", [], inFile, outFile)
+
+def actionScale(inFile, outFile, param):
+    return buildCmd("videoScale", param, inFile, outFile)
+
+def actionCameraMove(inFile, outFile, param):
+    return buildCmd("cameraMove", param, inFile, outFile)
+
+def actionRmShaky(inFile, outFile, param):
+    return buildCmd("rmShaky", [], inFile, outFile)
+
+def actionSpeed(inFile, outFile, param):
+    return buildCmd("videoSpeed", param, inFile, outFile);
+
+def actionImgOnVideo(inFile, outFile, param):
+    return buildCmd("PIP_imgOnVideo", param, inFile, outFile)
+
+def actionVideoOnImg(inFile, outFile, param):
+    return buildCmd("PIP_videoOnImg", param, inFile, outFile)
+
+def functionVideoEndOnImg(inFile, outFile, param):
+    return buildCmd("videoEndToOneImg", param, '', outFile)
+
+def actionFade(inFile, outFile, param):
+    return buildCmd("videoFade", param, inFile, outFile)
+
+def actionLogo(inFile, outFile, param):
+    return buildCmd("videoLogo", param, inFile, outFile)
 
 def parseStrategy(strategyFile):
     mergeList = ["videoMerge"]
@@ -537,9 +914,11 @@ def levelJson(jsonData, objLevel, curLevel=0):
         
 if __name__ == '__main__':
     # parseStrategy("E:/work/创业之路/音视频技术/科大讯飞/FFmpeg特效库/dev/strategy.json")
-    parseStrategy("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
-    handleAutoEdit("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
-    addMusic("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
+    # parseStrategy("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
+    # handleAutoEdit("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
+    parseStrategy_new("H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.01.34][等级3][进球]/strategy.json")
+    handleAutoEdit_new("H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.01.34][等级3][进球]/strategy.json")
+    # addMusic("H:/八喜/strategy.json")
     # test()
     # print(checkVideoMute("H:/auto_tool_test/output/"))
 

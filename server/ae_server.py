@@ -14,7 +14,7 @@ import json
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
-SERVER_VERSION = "1.0.7"
+SERVER_VERSION = "1.0.8"
 
 def save2File(file, content):
     with open(file, "a", encoding='utf-8') as f:
@@ -27,8 +27,8 @@ class ServerServicer(wxrpcauth_pb2.wxAuthServicer):
         # start
         content = "%s %s START\n" % (time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), request.name)
         save2File("log.txt", content)
-        parseStrategy(request.name)
-        handleAutoEdit(request.name)
+        parseStrategy_new(request.name)
+        handleAutoEdit_new(request.name)
         addMusic(request.name)
         # end
         content = "%s %s END\n" % (time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())), request.name)

@@ -62,8 +62,29 @@ class Queue(Thread):
     
     
     def add(self, target, *args):
+        for task in self.waiting:
+            print("has waiting")
+            if task.args == args:
+                return 1
         self.waiting.append(Task(target, *args))
-    
+        return 2
+
+    def cancelTask(self, target, *args):
+        for task in self.waiting:
+            if task.target == target and task.args == args:
+                self.waiting.remove(task)
+                return 1
+        return 0
+
+    def printWaiting(self):
+        for task in self.waiting:
+            print(task)
+
+    def checkWaiting(self, *args):
+        for task in self.waiting:
+            if task.args == args:
+                return True
+        return False
     
     def wait(self):
         while not self.idle:

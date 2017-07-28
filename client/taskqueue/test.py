@@ -15,7 +15,12 @@ def main():
     print ("will probably take half with taskqueue")
     print (q.num_workers)
     for i in range(10):
+        sleep(1)
         q.add(action, 2)
+
+    # print(q.cancelTask(action, 2))
+
+    q.printWaiting()
     
     for task in q.finished:
         print (task.result)
