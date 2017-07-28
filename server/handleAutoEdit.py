@@ -284,7 +284,7 @@ def parseStrategy_new(strategyFile):
                 clipData.addAction(actionCut(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
-                clipData.setVideoFileHash(file+str(param[0])+str(param[1]))
+                clipData.setVideoFileHash(file, str(param[0])+str(param[1]))
                 finalOutputFile = outputFile
 
                 # outputFormat
@@ -303,7 +303,7 @@ def parseStrategy_new(strategyFile):
                 clipData.addAction(actionCut_a(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
-                clipData.setVideoFileHash(file+str(param[0])+str(param[1]))
+                clipData.setVideoFileHash(file, str(param[0])+str(param[1]))
                 finalOutputFile = outputFile
 
                 # outputFormat
