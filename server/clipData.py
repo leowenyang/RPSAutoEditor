@@ -20,9 +20,7 @@ class ClipData(object):
     def setVideoFileHash(self, videoFile, salt=''):
         # self.inVideoFileHash = hashlib.md5(bytes(videoFile,encoding='utf-8')).hexdigest()
         md5Result = self.md5sum(videoFile)
-        print(videoFile, md5Result)
         self.inVideoFileHash = self.md5hex(videoFile+md5Result+salt)
-        print(self.inVideoFileHash)
         return self.inVideoFileHash
 
     def addAction(self, action):
@@ -41,6 +39,8 @@ class ClipData(object):
         # self.actionsHash = hash(''.join(self.actions))
         outData = ''
         for action in self.actions:
+            if action[0] == 'PIP_imgOnVideo':
+                outData += self.md5sum(action[2])
             for item in action:
                 outData += str(item)
         self.actionsHash = hashlib.md5(bytes(outData, encoding='utf-8')).hexdigest()

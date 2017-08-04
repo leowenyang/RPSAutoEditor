@@ -16,11 +16,9 @@ def test():
     # editor.splitAudio(handle)
     
     # 'contrast', 'brightness', 'saturation'
-    handle = ['videoCBS', '04.mp4', '1', '0', '1', '04_color.mp4']
-    editor = VideoAutoEditor()
-    editor.videoCBS(handle)
-
-    
+    # handle = ['videoCBS', '04.mp4', '1', '0', '1', '04_color.mp4']
+    # editor = VideoAutoEditor()
+    # editor.videoCBS(handle)
 
     # handle = ['outputFormat', 'H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.01.34][等级3][进球]/11.主相机.MP4', 'test.mp4']
     # editor = VideoAutoEditor()
@@ -77,9 +75,37 @@ def test():
     # editor = VideoAutoEditor()
     # editor.rmShaky(handle)
 
-    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '3', '6', 'clip_subtitle.mp4']
-    # editor = VideoAutoEditor()
-    # editor.PIP_imgOnVideo(handle)
+    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '1', '2', 'clip_subtitle.mp4']
+    editor = VideoAutoEditor()
+    editor.PIP_imgOnVideo(handle)
+
+    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '2', '3', 'clip_subtitle.mp4']
+    editor = VideoAutoEditor()
+    editor.PIP_imgOnVideo(handle)
+    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '3', '4', 'clip_subtitle.mp4']
+    editor = VideoAutoEditor()
+    editor.PIP_imgOnVideo(handle)
+    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '4', '5', 'clip_subtitle.mp4']
+    editor = VideoAutoEditor()
+    editor.PIP_imgOnVideo(handle)
+    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '5', '6', 'clip_subtitle.mp4']
+    editor = VideoAutoEditor()
+    editor.PIP_imgOnVideo(handle)
+    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '6', '7', 'clip_subtitle.mp4']
+    editor = VideoAutoEditor()
+    editor.PIP_imgOnVideo(handle)
+    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '7', '8', 'clip_subtitle.mp4']
+    editor = VideoAutoEditor()
+    editor.PIP_imgOnVideo(handle)
+    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '8', '9', 'clip_subtitle.mp4']
+    editor = VideoAutoEditor()
+    editor.PIP_imgOnVideo(handle)
+    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '9', '10', 'clip_subtitle.mp4']
+    editor = VideoAutoEditor()
+    editor.PIP_imgOnVideo(handle)
+    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '10', '11', 'clip_subtitle.mp4']
+    editor = VideoAutoEditor()
+    editor.PIP_imgOnVideo(handle)
 
     # handle = ['PIP_videoOnImg', 'header.png', 'clip.mp4', 'clip_pip.mp4']
     # editor = VideoAutoEditor()
@@ -208,7 +234,8 @@ def diffAutoEditorFile(newFile, oldFile):
         if not oldClip:
             continue
         if ((oldClip['actionsHash'] == clip['actionsHash']) 
-           and (clip['isMerge'] == '0')):
+           and (clip['isMerge'] == '0')
+           and (os.path.exists(clip['outVideoFile']))):
             # set no handle
             diffJson['clips_handle'][diffJson['clips_handle'].index(clip)]['noChange'] = '1'
 
@@ -254,7 +281,9 @@ def parseStrategy_new(strategyFile):
 
     # handle video clips
     clips = getJson(strategyFile, "video_clips")
+    nClip = 0
     for clip in clips:
+        nClip = nClip + 1
         # get info from JSON file
         file = clip.get('file', "")
         actions = clip.get('actions', "")
@@ -279,7 +308,7 @@ def parseStrategy_new(strategyFile):
                 clipData.setOutAudioFile(file)
             if 'cut' == cmd:
                 # videoCut
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_cut"+str(nAction)+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_cut"+str(nClip)+str(nAction)+baseName[-4:])
                 param[1] = round(param[1] - param[0], 3)
                 clipData.addAction(actionCut(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
@@ -288,7 +317,7 @@ def parseStrategy_new(strategyFile):
                 finalOutputFile = outputFile
 
                 # outputFormat
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nAction)+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 clipData.setOutAudioFile(outputFile)
@@ -298,7 +327,7 @@ def parseStrategy_new(strategyFile):
                 isCutWithAudio = False
             if 'cut_a' == cmd:
                 # videoCut
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_cut_a"+str(nAction)+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_cut_a"+str(nClip)+str(nAction)+baseName[-4:])
                 param[1] = round(param[1] - param[0], 3)
                 clipData.addAction(actionCut_a(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
@@ -307,7 +336,7 @@ def parseStrategy_new(strategyFile):
                 finalOutputFile = outputFile
 
                 # outputFormat
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nAction)+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 clipData.setOutAudioFile(outputFile)
@@ -317,7 +346,7 @@ def parseStrategy_new(strategyFile):
                 isCutWithAudio = True
             if 'format' == cmd:
                 # outputFormat
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
@@ -327,16 +356,16 @@ def parseStrategy_new(strategyFile):
 
                 # videoToOneImg
                 param = []
-                param.append(mergeList[-1])
                 param.append('-0.1')
-                outputFile = os.path.join(ouputFolder, "/clip_"+str(nClip)+".png")
-                clipData.addAction(functionVideoEndOnImg(finalOutputFile, outputFile, [lastOutputFile]))
+                outputFile = os.path.join(ouputFolder, "clip_"+str(nClip)+".png")
+                print(ouputFolder)
+                clipData.addAction(actionVideoEndOnImg(clipDataList[-1].outVideoFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
 
                 # PIP_videoOnImg
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_pip"+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_pip"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionVideoOnImg(finalOutputFile, outputFile, [lastOutputFile]))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
@@ -345,7 +374,7 @@ def parseStrategy_new(strategyFile):
                 # videoRotate
                 if param[0] == 0:
                     continue
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_rotate"+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_rotate"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionRotate(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
@@ -354,21 +383,21 @@ def parseStrategy_new(strategyFile):
                 # videoScale
                 if param[0] == 0 and param[1] == 0 and param[2] == 1920 and param[3] == 1080:
                     continue
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_range"+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_range"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionScale(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
             if 'camera_move' == cmd:
                 # cameraMove
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_camera"+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_camera"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionCameraMove(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
 
                 # rmShaky
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_rmshaky"+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_rmshaky"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionRmShaky(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
@@ -377,7 +406,7 @@ def parseStrategy_new(strategyFile):
                 # videoSpeed
                 if param[4] == 1:
                     continue
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_slow"+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_slow"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionSpeed(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
@@ -386,7 +415,7 @@ def parseStrategy_new(strategyFile):
                 # add subtitle
                 if param[0] != 1:
                     continue
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_subtitle"+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_subtitle"+str(nClip)+str(nAction)+baseName[-4:])
                 param = []
                 param.append(titlePng)
                 param.append('1')
@@ -399,14 +428,14 @@ def parseStrategy_new(strategyFile):
                 # add picture
                 if param[0] == '':
                     continue
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_pic"+str(nAction)+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_pic"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionImgOnVideo(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
             if 'fade_inout' == cmd:
                 # videoFade
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_fadeinout"+baseName[-4:])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_fadeinout"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionFade(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
@@ -414,7 +443,7 @@ def parseStrategy_new(strategyFile):
 
         if logoFile != '':
             # videoLogo
-            outputFile = os.path.join(ouputFolder, baseName[:-4]+"_logo"+baseName[-4:])
+            outputFile = os.path.join(ouputFolder, baseName[:-4]+"_logo"+str(nClip)+baseName[-4:])
             clipData.addAction(actionLogo(finalOutputFile, outputFile, [logoFile, '100']))
             clipData.setOutVideoFile(outputFile)
             # clipData.setOutAudioFile()
@@ -422,7 +451,7 @@ def parseStrategy_new(strategyFile):
 
         # get audio file
         if isHasAudio != '' :
-            audioOutputFile = os.path.join(ouputFolder, baseName[:-4]+"_audio.mp3")
+            audioOutputFile = os.path.join(ouputFolder, baseName[:-4]+str(nClip)+"_audio.mp3")
             if checkVideoMute(file) or not isCutWithAudio:
                 clipData.addAction(actionCreateMuteAudio(clipData.outAudioFile, audioOutputFile, []))
             else:
@@ -543,8 +572,8 @@ def actionImgOnVideo(inFile, outFile, param):
 def actionVideoOnImg(inFile, outFile, param):
     return buildCmd("PIP_videoOnImg", param, inFile, outFile)
 
-def functionVideoEndOnImg(inFile, outFile, param):
-    return buildCmd("videoEndToOneImg", param, '', outFile)
+def actionVideoEndOnImg(inFile, outFile, param):
+    return buildCmd("videoEndToOneImg", param, inFile, outFile)
 
 def actionFade(inFile, outFile, param):
     return buildCmd("videoFade", param, inFile, outFile)
@@ -916,8 +945,8 @@ if __name__ == '__main__':
     # parseStrategy("E:/work/创业之路/音视频技术/科大讯飞/FFmpeg特效库/dev/strategy.json")
     # parseStrategy("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
     # handleAutoEdit("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
-    parseStrategy_new("H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.01.34][等级3][进球]/strategy.json")
-    handleAutoEdit_new("H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.01.34][等级3][进球]/strategy.json")
+    parseStrategy_new("H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.08.22][等级3][进球]/strategy.json")
+    handleAutoEdit_new("H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.08.22][等级3][进球]/strategy.json")
     # addMusic("H:/八喜/strategy.json")
     # test()
     # print(checkVideoMute("H:/auto_tool_test/output/"))
