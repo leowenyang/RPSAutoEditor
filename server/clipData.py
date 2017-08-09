@@ -44,6 +44,7 @@ class ClipData(object):
             for item in action:
                 outData += str(item)
         self.actionsHash = hashlib.md5(bytes(outData, encoding='utf-8')).hexdigest()
+        print(self.actionsHash)
 
     def md5hex(self, word):  
         """ MD5加密算法，返回32位小写16进制符号 """   

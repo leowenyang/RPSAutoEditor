@@ -306,6 +306,7 @@ def parseStrategy_new(strategyFile):
             if 'join' == cmd:
                 # get audio
                 clipData.setOutAudioFile(file)
+                clipData.setOutVideoFile(file)
             if 'cut' == cmd:
                 # videoCut
                 outputFile = os.path.join(ouputFolder, baseName[:-4]+"_cut"+str(nClip)+str(nAction)+baseName[-4:])
@@ -883,6 +884,7 @@ def matchVideoTime(audioLibPath, videoTime):
 
     # travel all file
     for audioFile in audioFileList:
+        print(os.path.basename(audioFile))
         if (audioFile[-4:].upper() != ".MP3"):
             continue
         audioTime = getAVDuration(audioFile)

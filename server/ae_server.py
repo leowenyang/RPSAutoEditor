@@ -14,7 +14,7 @@ import json
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
-SERVER_VERSION = "1.0.11"
+SERVER_VERSION = "1.0.13"
 
 def save2File(file, content):
     with open(file, "a", encoding='utf-8') as f:
