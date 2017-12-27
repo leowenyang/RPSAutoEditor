@@ -26,6 +26,8 @@ class Queue(Thread):
         self.dying = False
         self.start()
 
+        self.exceptCode = 0
+
     def run(self):
         do_sleep = False
         while True:
@@ -42,6 +44,7 @@ class Queue(Thread):
             while len(self.waiting)>0 and len(self.running)<self.num_workers:
                 task = self.waiting.pop(0)
                 self.running.append(task)
+                print("Task is running", task.args)
                 task.start()
             
             # IF NO TASKS RUNNING OR WWAITING SET TIMEOUT START TIME
@@ -67,6 +70,7 @@ class Queue(Thread):
             if task.args == args:
                 return 1
         self.waiting.append(Task(target, *args))
+        print("Task is add", args)
         return 2
 
     def cancelTask(self, target, *args):
@@ -78,7 +82,7 @@ class Queue(Thread):
 
     def printWaiting(self):
         for task in self.waiting:
-            print(task)
+            print(task.target, task.args)
 
     def checkWaiting(self, *args):
         for task in self.waiting:
@@ -119,6 +123,7 @@ class Task(Thread):
             self._result = self.target(*self.args)
         except BaseException as e:
             self._result= e
+            print(e)
         return self
 
 

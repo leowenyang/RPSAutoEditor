@@ -8,6 +8,11 @@ def getWxBotID(file):
     robot.enable_puid(file)
     return robot.self.puid
 
+def getWxBotMsg(file):
+    robot = Bot()
+    robot.enable_puid(file)
+    return robot.self.puid, robot.self.nick_name
+
 def main():
     pass
     # getWxBotID('yiball.pkl')

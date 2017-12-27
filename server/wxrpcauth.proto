@@ -22,6 +22,9 @@ service wxAuth {
 
   // AutoEditor
   rpc CallAutoEditor (AuthRequest) returns (AuthReply) {}
+
+  // runAEScript
+  rpc runAEScript (AuthRequest) returns (AuthReply) {}
 }
 
 // The request message containing the user's name.

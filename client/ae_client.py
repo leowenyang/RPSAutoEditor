@@ -16,38 +16,30 @@ from time import time, sleep
 
 class AEClient(object):
   """docstring for AEClient"""
-  def __init__(self, host):
+  def __init__(self, parent, host):
     super(AEClient, self).__init__()
+    self.parentWin = parent
     self.port = '1337'
     self.host = host
     # new threads
     self.queue = Queue(workers=1)
     # http connect
     try:
-        channel = grpc.insecure_channel('{}:{}'.format(self.host, self.port))
-        self.stub = wxrpcauth_pb2.wxAuthStub(channel)
+        self.channel = grpc.insecure_channel('{}:{}'.format(self.host, self.port))
+        self.stub = wxrpcauth_pb2.wxAuthStub(self.channel)
     except Exception as e:
         print("RPC error")
         raise e
 
   def callAutoEditor(self, file):
-    response = self.stub.CallAutoEditor(wxrpcauth_pb2.AuthRequest(name=file))
-    print(response.message)
-    a,b = os.path.split(response.message)
-    tasks = []
-    task_status_json = os.path.join(os.path.abspath('.'), "task_status.json")
-    if(os.path.exists(task_status_json)):
-        with open(task_status_json, encoding='utf-8') as f:
-            tasks = json.load(f)
-            f.close()
-    for t in tasks:
-        if(a in t['task'] and b in t['task'] and t['status'] == '已提交'):
-            t['status'] = '已完成'
-            break
-
-    with open(task_status_json, "w", encoding = 'utf-8') as f:
-        f.write(json.dumps(tasks, ensure_ascii = False, indent = 4))
-        f.close()
+    try:
+        response = self.stub.CallAutoEditor(wxrpcauth_pb2.AuthRequest(name=file))
+        print(eval(response.message))
+        # self.parentWin.refresh_task_status_completed(response.message)
+    except Exception as e:
+        print("===========gRPC error=============")
+        # self.parentWin.refresh_status_bar("无法连接到服务器，请检查服务器是否启动！")
+        raise
 
   def run(self, file):
     # threading is stop, new one
@@ -74,8 +66,8 @@ class wxClient(object):
 
         # http connect
         try:
-            channel = grpc.insecure_channel('{}:{}'.format(host, self.port))
-            self.stub = wxrpcauth_pb2.wxAuthStub(channel)
+            self.channel = grpc.insecure_channel('{}:{}'.format(host, self.port))
+            self.stub = wxrpcauth_pb2.wxAuthStub(self.channel)
         except Exception as e:
             raise e
 
@@ -99,9 +91,13 @@ class wxClient(object):
         with open('yiball123.pkl','wb') as f:
            f.write(response.message)
 
-        wxBotID = getWxBotID('yiball123.pkl')
-        response = self.stub.checkWxBot(wxrpcauth_pb2.AuthRequest(name=wxBotID))
-        return response.message
+        # wxBotID = getWxBotID('yiball123.pkl')
+        # response = self.stub.checkWxBot(wxrpcauth_pb2.AuthRequest(name=wxBotID))
+        # return response.message
+
+        wxBotMsg = getWxBotMsg('yiball123.pkl')
+        response = self.stub.checkWxBot(wxrpcauth_pb2.AuthRequest(name=wxBotMsg[0]))
+        return wxBotMsg[1], response.message
 
 	
 if __name__ == '__main__':
@@ -112,5 +108,5 @@ if __name__ == '__main__':
     # client.run("G:/视频剪辑/等级3/PIC_0038_射门/strategy.json")
     # print("second one")
     # client = wxClient('127.0.0.1')
-    # # print(client.checkWxUser())
+    # print(client.checkWxUser())
     # print(client.checkVersion("1.01"))

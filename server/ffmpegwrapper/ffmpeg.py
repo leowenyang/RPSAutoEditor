@@ -99,7 +99,8 @@ class FFmpegProcess(object):
         """
         # print(self.command)
         print((" ".join(self.command)))
-        os.system(" ".join(self.command))
+        ret = os.system(" ".join(self.command))
+        return ret
         # cmd = str(" ".join(self.command))
         # self.process = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True)
         # #self.process.wait()

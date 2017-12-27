@@ -14,6 +14,7 @@ class ClipData(object):
         self.outAudioFile = ''
         self.actions = []
         self.actionsHash = ''
+        self.idType = '0'
         self.noChange = '0'
         self.isMerge = '0'
 
@@ -34,6 +35,9 @@ class ClipData(object):
 
     def setMergeFlag(self):
         self.isMerge = '1'
+
+    def setIdType(self, idType):
+        self.idType = idType
 
     def setActionsHash(self):
         # self.actionsHash = hash(''.join(self.actions))

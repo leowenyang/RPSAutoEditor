@@ -49,6 +49,11 @@ class wxAuthStub(object):
         request_serializer=wxrpcauth__pb2.AuthRequest.SerializeToString,
         response_deserializer=wxrpcauth__pb2.AuthReply.FromString,
         )
+    self.runAEScript = channel.unary_unary(
+        '/wxAuth/runAEScript',
+        request_serializer=wxrpcauth__pb2.AuthRequest.SerializeToString,
+        response_deserializer=wxrpcauth__pb2.AuthReply.FromString,
+        )
 
 
 class wxAuthServicer(object):
@@ -104,6 +109,13 @@ class wxAuthServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def runAEScript(self, request, context):
+    """runAEScript
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_wxAuthServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -139,6 +151,11 @@ def add_wxAuthServicer_to_server(servicer, server):
       ),
       'CallAutoEditor': grpc.unary_unary_rpc_method_handler(
           servicer.CallAutoEditor,
+          request_deserializer=wxrpcauth__pb2.AuthRequest.FromString,
+          response_serializer=wxrpcauth__pb2.AuthReply.SerializeToString,
+      ),
+      'runAEScript': grpc.unary_unary_rpc_method_handler(
+          servicer.runAEScript,
           request_deserializer=wxrpcauth__pb2.AuthRequest.FromString,
           response_serializer=wxrpcauth__pb2.AuthReply.SerializeToString,
       ),

@@ -4,6 +4,7 @@
 import os
 import json
 import subprocess
+import random
 
 from ffmpegwrapper.videoautoeditor import *
 from ffmpegwrapper.timerCounter import *
@@ -11,6 +12,26 @@ from ffmpegwrapper.timerCounter import *
 from clipData import *
 
 def test():
+    # editor = VideoAutoEditor()
+    # during = editor.creatMuteAudio("clip.mp4")
+    # print(during)
+
+    handle = ['addVoice', 'clip.mp4', '1', '3', 'clip_voice.mp4']
+    editor = VideoAutoEditor()
+    editor.addVoice(handle)
+
+    # handle = ['showTime', 'clip.mp4', '00\:00\:03\:00', '4', '8', 'out.mp4']
+    # editor = VideoAutoEditor()
+    # editor.showTime(handle)
+
+    # handle = ['videoToGif', 'clip.mp4', 'clip.gif']
+    # editor = VideoAutoEditor()
+    # editor.videoToGif(handle)
+
+    # handle = ['creatMuteAudio', 'clip.mp4', 'clip_bak.mp3']
+    # editor = VideoAutoEditor()
+    # editor.creatMuteAudio(handle)
+
     # handle = ['splitAudio', '04.mp4', '04.mp3']
     # editor = VideoAutoEditor()
     # editor.splitAudio(handle)
@@ -75,37 +96,37 @@ def test():
     # editor = VideoAutoEditor()
     # editor.rmShaky(handle)
 
-    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '1', '2', 'clip_subtitle.mp4']
-    editor = VideoAutoEditor()
-    editor.PIP_imgOnVideo(handle)
+    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '1', '2', 'clip_subtitle.mp4']
+    # editor = VideoAutoEditor()
+    # editor.PIP_imgOnVideo(handle)
 
-    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '2', '3', 'clip_subtitle.mp4']
-    editor = VideoAutoEditor()
-    editor.PIP_imgOnVideo(handle)
-    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '3', '4', 'clip_subtitle.mp4']
-    editor = VideoAutoEditor()
-    editor.PIP_imgOnVideo(handle)
-    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '4', '5', 'clip_subtitle.mp4']
-    editor = VideoAutoEditor()
-    editor.PIP_imgOnVideo(handle)
-    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '5', '6', 'clip_subtitle.mp4']
-    editor = VideoAutoEditor()
-    editor.PIP_imgOnVideo(handle)
-    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '6', '7', 'clip_subtitle.mp4']
-    editor = VideoAutoEditor()
-    editor.PIP_imgOnVideo(handle)
-    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '7', '8', 'clip_subtitle.mp4']
-    editor = VideoAutoEditor()
-    editor.PIP_imgOnVideo(handle)
-    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '8', '9', 'clip_subtitle.mp4']
-    editor = VideoAutoEditor()
-    editor.PIP_imgOnVideo(handle)
-    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '9', '10', 'clip_subtitle.mp4']
-    editor = VideoAutoEditor()
-    editor.PIP_imgOnVideo(handle)
-    handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '10', '11', 'clip_subtitle.mp4']
-    editor = VideoAutoEditor()
-    editor.PIP_imgOnVideo(handle)
+    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '2', '3', 'clip_subtitle.mp4']
+    # editor = VideoAutoEditor()
+    # editor.PIP_imgOnVideo(handle)
+    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '3', '4', 'clip_subtitle.mp4']
+    # editor = VideoAutoEditor()
+    # editor.PIP_imgOnVideo(handle)
+    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '4', '5', 'clip_subtitle.mp4']
+    # editor = VideoAutoEditor()
+    # editor.PIP_imgOnVideo(handle)
+    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '5', '6', 'clip_subtitle.mp4']
+    # editor = VideoAutoEditor()
+    # editor.PIP_imgOnVideo(handle)
+    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '6', '7', 'clip_subtitle.mp4']
+    # editor = VideoAutoEditor()
+    # editor.PIP_imgOnVideo(handle)
+    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '7', '8', 'clip_subtitle.mp4']
+    # editor = VideoAutoEditor()
+    # editor.PIP_imgOnVideo(handle)
+    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '8', '9', 'clip_subtitle.mp4']
+    # editor = VideoAutoEditor()
+    # editor.PIP_imgOnVideo(handle)
+    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '9', '10', 'clip_subtitle.mp4']
+    # editor = VideoAutoEditor()
+    # editor.PIP_imgOnVideo(handle)
+    # handle = ['PIP_imgOnVideo', 'clip.mp4', 'header.png', '10', '11', 'clip_subtitle.mp4']
+    # editor = VideoAutoEditor()
+    # editor.PIP_imgOnVideo(handle)
 
     # handle = ['PIP_videoOnImg', 'header.png', 'clip.mp4', 'clip_pip.mp4']
     # editor = VideoAutoEditor()
@@ -138,7 +159,7 @@ def addMusic(strategyFile):
         # xiaopian
         if len(titleText) == 0:
             titleText = "product_music"
-        resultFile = ouputFolder+'/../'+titleText+'.mp4'
+        resultFile = ouputFolder+'/'+titleText+'_4M'+'.mp4'
 
     elif videoType == "2":
         # jijinsucai
@@ -152,7 +173,7 @@ def addMusic(strategyFile):
         shutil.copyfile(os.path.join(ouputFolder, 'product.mp4'), tmpFileName)
     elif videoType == "3":
         # jijin
-        resultFile = ouputFolder+'/../'+'全场集锦.mp4'
+        resultFile = ouputFolder+'/'+'全场集锦_4M.mp4'
     else:
         return
 
@@ -162,11 +183,14 @@ def addMusic(strategyFile):
     # 1. get video length
     videoTime = getAVDuration(ouputFolder+"/product.mp4")
     # 2. find musstrategyFileic
-    musicFile = matchVideoTime(musicFolder, videoTime)
+    # musicFile = matchVideoTime(musicFolder, videoTime)
+    musicFile = matchVideoTime_new(musicFolder, videoTime, ouputFolder)
 
     # Add music
     if musicFile == None:
         return
+
+    print(musicFile)
 
     if isHasAudio == '' :
         listParam = ['addMusic', ouputFolder+'/product.mp4', musicFile, resultFile]
@@ -177,13 +201,43 @@ def addMusic(strategyFile):
         editor = VideoAutoEditor()
         editor.addMergeMusic(listParam)
 
+
+
     if videoType == "1":
+        # trans video rate
+        resultFile2 = ouputFolder+'/../'+titleText+'.mp4'
+        listParam = ['transVideoRate', resultFile, resultFile2]
+        editor = VideoAutoEditor()
+        editor.transVideoRate(listParam)
+
         # Save other folder
         tmpSaveFolder = ouputFolder+'/../../小片'
         if not os.path.exists(tmpSaveFolder):
             os.mkdir(tmpSaveFolder)
         # copy file
-        shutil.copyfile(resultFile, os.path.join(tmpSaveFolder, os.path.basename(resultFile)))
+        shutil.copyfile(resultFile2, os.path.join(tmpSaveFolder, os.path.basename(resultFile2)))
+
+        # save file for review
+        with open("config.conf", encoding='utf-8') as f:
+            json_object = json.load(f)
+            reviewFold = json_object['reviewFold']
+        if os.path.exists(reviewFold):
+            p,f = os.path.split(ouputFolder)
+            p,f = os.path.split(p)
+            p,f = os.path.split(p)
+            p,f = os.path.split(p)
+            reviewFold_output = os.path.join(reviewFold, f)
+            if not os.path.exists(reviewFold_output):
+                os.mkdir(reviewFold_output)
+            shutil.copyfile(resultFile2, os.path.join(reviewFold_output, os.path.basename(resultFile2)))
+
+    elif videoType == "3":
+        # trans video rate
+        listParam = ['transVideoRate', resultFile, ouputFolder+'/../'+'全场集锦.mp4']
+        editor = VideoAutoEditor()
+        editor.transVideoRate(listParam)
+    else:
+        return
 
 def buildCmd(cmd, param, inFile, outFile):
     cmdList = []
@@ -195,24 +249,6 @@ def buildCmd(cmd, param, inFile, outFile):
     cmdList.append(outFile)
 
     return cmdList
-
-def handleAutoEdit(strategyFile):
-    # counter time
-    timerCounter = CountingTimer()
-    timerCounter.begin()
-
-    # handle config
-    config = getJson(strategyFile, "config")
-    ouputFolder = os.path.realpath(config['ouputFolder'])
-
-    editor = VideoAutoEditor()
-    actions = getJson(ouputFolder+"/autoEditor.json", "action")
-    for cmd in actions:
-        editor.handleCmd(cmd)
-
-    # counter time
-    timerCounter.end()
-    print("total spend %s s" % (timerCounter.diff()[0]))
 
 def findClipDataByhash(hash, clipData):
     for clip in clipData:
@@ -243,7 +279,7 @@ def diffAutoEditorFile(newFile, oldFile):
         json.dump(diffJson, f, indent=4, ensure_ascii=False)
     return os.path.join(os.path.dirname(newFile),"autoEditor_diff.json")
 
-def handleAutoEdit_new(strategyFile):
+def diffAutoEditFile_new(strategyFile):
     # counter time
     timerCounter = CountingTimer()
     timerCounter.begin()
@@ -258,20 +294,101 @@ def handleAutoEdit_new(strategyFile):
     else:
         handleAEFile = ouputFolder+"/autoEditor.json"
 
+    # counter time
+    timerCounter.end()
+    print("total spend %s s" % (timerCounter.diff()[0]))
+    return handleAEFile
+
+def handleAutoEdit_new(handleAEFile, idType='0'):
+    # counter time
+    timerCounter = CountingTimer()
+    timerCounter.begin()
+
     editor = VideoAutoEditor()
     clips = getJson(handleAEFile, "clips_handle")
     for clip in clips:
+        if clip['idType'] != idType:
+            continue
         if clip['noChange'] == '1':
             continue
         for action in clip['actions']:
-            editor.handleCmd(action)
+            result = editor.handleCmd(action)
+            # command error
+            if result == 1:
+                return 1
 
     # counter time
     timerCounter.end()
     print("total spend %s s" % (timerCounter.diff()[0]))
+    return 0
 
-def parseStrategy_new(strategyFile):
+# def handleAutoEdit_new(strategyFile):
+#     # counter time
+#     timerCounter = CountingTimer()
+#     timerCounter.begin()
+
+#     # handle config
+#     config = getJson(strategyFile, "config")
+#     ouputFolder = os.path.realpath(config['ouputFolder'])
+
+#     # check autoEditor file
+#     if os.path.exists(ouputFolder + "/autoEditor_old.json"):
+#         handleAEFile = diffAutoEditorFile(ouputFolder+"/autoEditor.json", ouputFolder + "/autoEditor_old.json")
+#     else:
+#         handleAEFile = ouputFolder+"/autoEditor.json"
+
+#     editor = VideoAutoEditor()
+#     clips = getJson(handleAEFile, "clips_handle")
+#     for clip in clips:
+#         if clip['noChange'] == '1':
+#             continue
+#         for action in clip['actions']:
+#             result = editor.handleCmd(action)
+#             # command error
+#             if result == 1:
+#                 return 1
+
+#     # counter time
+#     timerCounter.end()
+#     print("total spend %s s" % (timerCounter.diff()[0]))
+#     return 0
+
+def transCBS(contrast, brightness, saturation):
+    param = []
+    # contrast [-100, 100, 0] -> [0, 2, 1]
+    result = (contrast + 100) * 0.01
+    # if result > 3:
+    #     result = 3 + (result-3)/3.0
+    #     print(result)
+    # result -= 2
+    print(result)
+    param.append(result)
+
+    # brightness [-100, 100, 0] -> [-1, 1, 0]
+    result = brightness * 0.01
+    print(result)
+    param.append(result)
+
+    # saturation [-100, 100, 0] -> [0, 2, 1]
+    result = (saturation + 100) * 0.01
+    # if result > 1:
+    #     result = 1 + (result-1)*2
+    # print(result)
+    param.append(result)
+
+    return param
+
+# def parseStrategy_new(strategyFile):
+def parseStrategy_new(strategyFile, num=1):
+    # result
+    resultList = []
+
     clipDataList = []
+    # check file is exsit
+    if not os.path.exists(strategyFile):
+        resultList.append(strategyFile)
+        return resultList
+
     # handle config
     config = getJson(strategyFile, "config")
     logoFile = config.get('logo', "")
@@ -286,17 +403,30 @@ def parseStrategy_new(strategyFile):
         nClip = nClip + 1
         # get info from JSON file
         file = clip.get('file', "")
+        camera = clip.get('camera', "").strip()
         actions = clip.get('actions', "")
         baseName = os.path.basename(file)
 
+        # check file is exsit
+        if not os.path.exists(file):
+            resultList.append(file)
+
         # new clipData
         clipData = ClipData(file)
+        clipData.setIdType(str(nClip % num))
         outputFile = ''
         finalOutputFile = file
 
         nAction = 0
-        isCutWithAudio = True
+        isAddLogo = False
+        isNeedFormat = False
         muteAduioFile = ''
+        # have Audio
+        if checkVideoMute(file):
+            isHaveAudio = False
+        else:
+            isHaveAudio = True
+
         for action in actions:
             nAction = nAction + 1
             # get action info
@@ -304,9 +434,15 @@ def parseStrategy_new(strategyFile):
             param = action.get('parameter', "")
 
             if 'join' == cmd:
+                # no need format
+                isNeedFormat = False
                 # get audio
                 clipData.setOutAudioFile(file)
                 clipData.setOutVideoFile(file)
+                if camera == '片头' or camera == '转场' or camera == '片尾':
+                    isAddLogo = False
+                else:
+                    isAddLogo = True
             if 'cut' == cmd:
                 # videoCut
                 outputFile = os.path.join(ouputFolder, baseName[:-4]+"_cut"+str(nClip)+str(nAction)+baseName[-4:])
@@ -317,15 +453,10 @@ def parseStrategy_new(strategyFile):
                 clipData.setVideoFileHash(file, str(param[0])+str(param[1]))
                 finalOutputFile = outputFile
 
-                # outputFormat
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nClip)+str(nAction)+baseName[-4:])
-                clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
-                clipData.setOutVideoFile(outputFile)
-                clipData.setOutAudioFile(outputFile)
-                finalOutputFile = outputFile
-
                 # no Audio
-                isCutWithAudio = False
+                isHaveAudio = False
+                # need formate
+                isNeedFormat = True
             if 'cut_a' == cmd:
                 # videoCut
                 outputFile = os.path.join(ouputFolder, baseName[:-4]+"_cut_a"+str(nClip)+str(nAction)+baseName[-4:])
@@ -336,22 +467,15 @@ def parseStrategy_new(strategyFile):
                 clipData.setVideoFileHash(file, str(param[0])+str(param[1]))
                 finalOutputFile = outputFile
 
-                # outputFormat
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nClip)+str(nAction)+baseName[-4:])
-                clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
-                clipData.setOutVideoFile(outputFile)
-                clipData.setOutAudioFile(outputFile)
-                finalOutputFile = outputFile
-
-                # have Audio
-                isCutWithAudio = True
+                # need formate
+                isNeedFormat = True
             if 'format' == cmd:
                 # outputFormat
                 outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
-                finalOutputFile = outputFile
+                finalOutputFile = outputFile  
             if 'addstar' == cmd:
                 lastOutputFile = finalOutputFile
 
@@ -360,7 +484,7 @@ def parseStrategy_new(strategyFile):
                 param.append('-0.1')
                 outputFile = os.path.join(ouputFolder, "clip_"+str(nClip)+".png")
                 print(ouputFolder)
-                clipData.addAction(actionVideoEndOnImg(clipDataList[-1].outVideoFile, outputFile, param))
+                clipData.addAction(actionVideoEndOneImg(clipDataList[-1].outVideoFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
@@ -416,6 +540,11 @@ def parseStrategy_new(strategyFile):
                 # add subtitle
                 if param[0] != 1:
                     continue
+
+                # check file is exsit
+                if not os.path.exists(titlePng):
+                    resultList.append(titlePng)
+
                 outputFile = os.path.join(ouputFolder, baseName[:-4]+"_subtitle"+str(nClip)+str(nAction)+baseName[-4:])
                 param = []
                 param.append(titlePng)
@@ -426,11 +555,28 @@ def parseStrategy_new(strategyFile):
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
             if 'add_pic' == cmd:
+                # check file is exsit
+                if not os.path.exists(param[0]):
+                    resultList.append(param[0])
+
                 # add picture
                 if param[0] == '':
                     continue
                 outputFile = os.path.join(ouputFolder, baseName[:-4]+"_pic"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionImgOnVideo(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'add_img' == cmd:
+                # check file is exsit
+                if not os.path.exists(param[0]):
+                    resultList.append(param[0])
+
+                # add img
+                if param[0] == '':
+                    continue
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_img"+str(nClip)+str(nAction)+baseName[-4:])
+                clipData.addAction(actionImgOnVideo_2(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
@@ -441,8 +587,53 @@ def parseStrategy_new(strategyFile):
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
+            if 'set_cbs' == cmd:
+                # videoCBS
+                cbsParam = transCBS(param[0], param[1], param[2])
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_cbs"+str(nClip)+str(nAction)+baseName[-4:])
+                clipData.addAction(actionSetCBS(finalOutputFile, outputFile, cbsParam))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'add_filter' == cmd:
+                # add filter
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_filter"+str(nClip)+str(nAction)+baseName[-4:])
+                clipData.addAction(actionAddFilter(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'add_time' == cmd:
+                # add filter
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_time"+str(nClip)+str(nAction)+baseName[-4:])
+                clipData.addAction(actionShowTime(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'add_voice' == cmd:
+                # add filter
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_voice"+str(nClip)+str(nAction)+baseName[-4:])
+                clipData.addAction(actionAddVoice(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                clipData.setOutAudioFile(outputFile)
+                finalOutputFile = outputFile
+                # have Audio
+                isHaveAudio = True
+        # outputFormat
+        if isNeedFormat:
+            outputFile = os.path.join(ouputFolder, baseName[:-4]+"_format"+str(nClip)+str(nAction)+baseName[-4:])
+            clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
+            clipData.setOutVideoFile(outputFile)
+            # no refer audio file
+            # NEED to use format file
+            if clipData.outAudioFile == file:
+                clipData.setOutAudioFile(outputFile)
+            finalOutputFile = outputFile
 
-        if logoFile != '':
+        if isAddLogo and logoFile != '':
+            # check logo is exsit
+            if not os.path.exists(logoFile):
+                resultList.append(logoFile)
+
             # videoLogo
             outputFile = os.path.join(ouputFolder, baseName[:-4]+"_logo"+str(nClip)+baseName[-4:])
             clipData.addAction(actionLogo(finalOutputFile, outputFile, [logoFile, '100']))
@@ -453,70 +644,37 @@ def parseStrategy_new(strategyFile):
         # get audio file
         if isHasAudio != '' :
             audioOutputFile = os.path.join(ouputFolder, baseName[:-4]+str(nClip)+"_audio.mp3")
-            if checkVideoMute(file) or not isCutWithAudio:
+            if not isHaveAudio:
                 clipData.addAction(actionCreateMuteAudio(clipData.outAudioFile, audioOutputFile, []))
             else:
                 clipData.addAction(actionSplitAudio(clipData.outAudioFile, audioOutputFile, []))  
             clipData.setOutAudioFile(audioOutputFile)
 
+            # merge video and audio
+            outputFile = os.path.join(ouputFolder, baseName[:-4]+"_withaudio"+str(nClip)+str(nAction)+baseName[-4:])
+            clipData.addAction(actionMergeAudio(finalOutputFile, outputFile, [audioOutputFile]))
+            clipData.setOutVideoFile(outputFile)
+            # clipData.setOutAudioFile()
+            finalOutputFile = outputFile
+
         # append list
         clipData.setActionsHash()
         clipDataList.append(clipData)
 
-    # general merge file
-    if isHasAudio != '' :
-        # gen product
-        mergeList = ["videoMerge"]
-        outputFile = os.path.join(ouputFolder, "product_video.mp4")
-        clipData = ClipData(outputFile)
-        for clip in clipDataList:
-            mergeList.append(clip.outVideoFile)
-        mergeList.append(outputFile)
-        clipData.addAction(mergeList)
-        clipData.setOutVideoFile(outputFile)
-        clipData.setActionsHash()
-        clipData.setMergeFlag()
-        clipDataList.append(clipData)
-        finalOutputFile = outputFile
-
-
-        # gen product audio
-        mergeList = ["videoMerge"]
-        outputFile = os.path.join(ouputFolder, "product_audio.mp3")
-        clipData = ClipData(outputFile)
-        for clip in clipDataList:
-            if clip.outAudioFile == '':
-                continue
-            mergeList.append(clip.outAudioFile)
-        mergeList.append(outputFile)
-        clipData.addAction(mergeList)
-        clipData.setOutVideoFile(outputFile)
-        clipData.setActionsHash()
-        clipData.setMergeFlag()
-        clipDataList.append(clipData)
-        audioOutputFile = outputFile
-
-        # merge product video and audio
-        outputFile = os.path.join(ouputFolder, "product.mp4")
-        clipData = ClipData(outputFile)
-        clipData.addAction(actionMergeAudio(finalOutputFile, outputFile, [audioOutputFile]))
-        clipData.setOutVideoFile(outputFile)
-        clipData.setMergeFlag()
-        clipDataList.append(clipData)
-    else:
-        mergeList = ["videoMerge"]
-        outputFile = os.path.join(ouputFolder, "product.mp4")
-        clipData = ClipData(outputFile)
-        for clip in clipDataList:
-            mergeList.append(clip.outVideoFile)
-        mergeList.append(outputFile)
-        clipData.addAction(mergeList)
-        clipData.setOutVideoFile(outputFile)
-        clipData.setActionsHash()
-        clipDataList.append(clipData)
-        # clipData.setOutAudioFile()
-        clipData.setMergeFlag()
-        finalOutputFile = outputFile
+    # gen product
+    mergeList = ["videoMerge"]
+    outputFile = os.path.join(ouputFolder, "product.mp4")
+    clipData = ClipData(outputFile)
+    for clip in clipDataList:
+        mergeList.append(clip.outVideoFile)
+    mergeList.append(outputFile)
+    clipData.addAction(mergeList)
+    clipData.setOutVideoFile(outputFile)
+    clipData.setActionsHash()
+    clipData.setMergeFlag()
+    clipData.setIdType('0')
+    clipDataList.append(clipData)
+    finalOutputFile = outputFile
 
     # save JSON file
     json_object = {}
@@ -531,6 +689,8 @@ def parseStrategy_new(strategyFile):
  
     with open(ouputFolder + "/autoEditor.json", "w", encoding='utf-8') as f:
         json.dump(json_object, f, indent=4, ensure_ascii=False)
+
+    return resultList
 
 def actionCreateMuteAudio(inFile, outFile, param):
     return buildCmd("creatMuteAudio", param, inFile, outFile)
@@ -570,10 +730,13 @@ def actionSpeed(inFile, outFile, param):
 def actionImgOnVideo(inFile, outFile, param):
     return buildCmd("PIP_imgOnVideo", param, inFile, outFile)
 
+def actionImgOnVideo_2(inFile, outFile, param):
+    return buildCmd("PIP_imgOnVideo_2", param, inFile, outFile)
+
 def actionVideoOnImg(inFile, outFile, param):
     return buildCmd("PIP_videoOnImg", param, inFile, outFile)
 
-def actionVideoEndOnImg(inFile, outFile, param):
+def actionVideoEndOneImg(inFile, outFile, param):
     return buildCmd("videoEndToOneImg", param, inFile, outFile)
 
 def actionFade(inFile, outFile, param):
@@ -582,252 +745,17 @@ def actionFade(inFile, outFile, param):
 def actionLogo(inFile, outFile, param):
     return buildCmd("videoLogo", param, inFile, outFile)
 
-def parseStrategy(strategyFile):
-    mergeList = ["videoMerge"]
-    mergeAudioList = ["videoMerge"]
-    videoAudioList = []
-    muteAduioFile = ''
-    # mergeList = ["eachVideoMerge"]
-    clipMergeList = []
-    actionList = []
-    cmdList = []
-    logoFile = ''
-    titlePng = ''
-    ouputFolder = ''
-    isHasAudio = ''
+def actionSetCBS(inFile, outFile, param):
+    return buildCmd("videoCBS", param, inFile, outFile)
+    
+def actionAddFilter(inFile, outFile, param):
+    return buildCmd("addFilter", param, inFile, outFile)
 
-    # handle config
-    config = getJson(strategyFile, "config")
-    logoFile = config['logo']
-    titlePng = config['title']
-    isHasAudio = config.get('audio', "")
-    ouputFolder = os.path.realpath(config['ouputFolder'])
+def actionShowTime(inFile, outFile, param):
+    return buildCmd("showTime", param, inFile, outFile)
 
-
-    # handle video clips
-    strategy = getJson(strategyFile, "video_clips")
-    nClip = 0
-    nLastClip = len(strategy)
-    for clip in strategy:
-        # some temp var
-        nClip = nClip + 1
-        finalOutputFile = ''
-        outputFile = ''
-
-        # get info from JSON file
-        file = clip['file']
-        actions = clip['actions']
-
-        isAddLogo = False
-        isCutWithAudio = False
-        muteAduioFile = ''
-        nAction = 0
-        for action in actions:
-            # some temp var
-            nAction = nAction + 1
-            cmd = action["action"]
-            if 'join' == cmd:
-                finalOutputFile = file
-                # check if add logo
-                param = action["parameter"]
-                mergeTime = param[0]
-                if mergeTime > 0 or nClip == 1:
-                    isAddLogo = False
-                else:
-                    isAddLogo = True
-
-                # get audio from file
-                muteAduioFile = finalOutputFile
-                isCutWithAudio = True
-
-            if 'cut' == cmd:
-                param = action["parameter"]
-
-                # videoCut
-                outputFile = ouputFolder + "/clip_"+str(nClip)+file[-4:]
-                param[1] = round(param[1] - param[0], 3)
-                actionList.append(buildCmd("videoCut", param, file, outputFile))
-                finalOutputFile = outputFile
-
-                # outputFormat
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_format.mp4"
-                actionList.append(buildCmd("outputFormat", [], finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-                # get audio from file
-                muteAduioFile = finalOutputFile
-                isCutWithAudio = False
-
-            if 'cut_a' == cmd:
-                param = action["parameter"]
-
-                # videoCut
-                outputFile = ouputFolder + "/clip_"+str(nClip)+file[-4:]
-                param[1] = round(param[1] - param[0], 3)
-                actionList.append(buildCmd("videoCut_a", param, file, outputFile))
-                finalOutputFile = outputFile
-
-                # outputFormat
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_format.mp4"
-                actionList.append(buildCmd("outputFormat", [], finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-                # get audio from file
-                muteAduioFile = finalOutputFile
-                isCutWithAudio = True
-
-            if 'format' == cmd:
-                param = action["parameter"]
-
-                # outputFormat
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_mp4format.mp4"
-                actionList.append(buildCmd("outputFormat", [], finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-            if 'addstar' == cmd:
-                param = action["parameter"]
-
-                lastOutputFile = finalOutputFile
-
-                # videoToOneImg
-                param = []
-                param.append(mergeList[-1])
-                param.append('-0.1')
-                outputFile = ouputFolder + "/clip_"+str(nClip)+".png"
-                actionList.append(buildCmd("videoEndToOneImg", param, '', outputFile))
-                finalOutputFile = outputFile
-
-                # PIP_videoOnImg
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_pip.mp4"
-                actionList.append(buildCmd("PIP_videoOnImg", [lastOutputFile], finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-            if 'rotate' == cmd:
-                param = action["parameter"]
-
-                # videoRotate
-                if param[0] == 0:
-                    continue
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_rotate.mp4"
-                actionList.append(buildCmd("videoRotate", param, finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-            if 'select_range' == cmd:
-                param = action["parameter"]
-
-                # videoScale
-                if param[0] == 0 and param[1] == 0 and param[2] == 1920 and param[3] == 1080:
-                    continue
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_range.mp4"
-                actionList.append(buildCmd("videoScale", param, finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-            if 'camera_move' == cmd:
-                param = action["parameter"]
-
-                # cameraMove
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_camera.mp4"
-                actionList.append(buildCmd("cameraMove", param, finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-                # rmShaky
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_rmshaky.mp4"
-                actionList.append(buildCmd("rmShaky", [], finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-            if 'slow_motion' == cmd:
-                param = action["parameter"]
-
-                # videoSpeed
-                if param[4] == 1:
-                    continue
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_slow.mp4"
-                actionList.append(buildCmd("videoSpeed", param, finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-            if 'add_subtitle' == cmd:
-                param = action["parameter"]
-
-                # add subtitle
-                if param[0] != 1:
-                    continue
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_subtitle.mp4"
-                param = []
-                param.append(titlePng)
-                param.append('1')
-                param.append('3')
-                actionList.append(buildCmd("PIP_imgOnVideo", param, finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-            if 'add_pic' == cmd:
-                param = action["parameter"]
-
-                # add picture
-                if param[0] == '':
-                    continue
-                # param[2] = param[1] + param[2]
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_pic_"+str(nAction)+".mp4"
-                actionList.append(buildCmd("PIP_imgOnVideo", param, finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-            if 'fade_inout' == cmd:
-                param = action["parameter"]
-
-                outputFile = ouputFolder + "/clip_"+str(nClip)+"_fade_"+str(nAction)+".mp4"
-                actionList.append(buildCmd("videoFade", param, finalOutputFile, outputFile))
-                finalOutputFile = outputFile
-
-        if isAddLogo and logoFile != '':
-            # videoLogo
-            outputFile = ouputFolder + "/clip_"+str(nClip)+"_logo.mp4"
-            actionList.append(buildCmd("videoLogo", [logoFile, '100'], finalOutputFile, outputFile))
-            finalOutputFile = outputFile
-
-        # get audio file
-        if isHasAudio != '' :
-            audioOutputFile = ouputFolder + "/clip_"+str(nClip)+"_audio.mp3"
-            if checkVideoMute(file) or not isCutWithAudio:
-                actionList.append(buildCmd("creatMuteAudio", [], finalOutputFile, audioOutputFile))
-            else:
-                actionList.append(buildCmd("splitAudio", [], muteAduioFile, audioOutputFile))  
-            mergeAudioList.append(audioOutputFile)
-        
-        # clip finished, merge file
-        # clipMergeList.append([finalOutputFile, mergeTime])
-        # clipMergeList.append(finalOutputFile)
-        # merge clip
-        mergeList.append(finalOutputFile)
-
-    if isHasAudio != '' :
-        # gen product
-        finalOutputFile = ouputFolder + "/product_video.mp4"
-        mergeList.append(finalOutputFile)
-
-        # gen product audio
-        audioOutputFile = ouputFolder + "/product_audio.mp3"
-        mergeAudioList.append(audioOutputFile)
-
-        # merge product video and audio
-        outputFile = ouputFolder + "/product.mp4"
-        videoAudioList = buildCmd("mergeAudio", [audioOutputFile], finalOutputFile, outputFile)
-    else :
-        # gen product
-        finalOutputFile = ouputFolder + "/product.mp4"
-        mergeList.append(finalOutputFile)
-
-    # save JSON file
-    json_object = {}
-    json_object["action"] = []
-    for item in actionList:
-        json_object["action"].append(item)
-    json_object["action"].append(mergeList)
-    if isHasAudio != '' :
-        json_object["action"].append(mergeAudioList)
-        json_object["action"].append(videoAudioList)
-
-    with open(ouputFolder + "/autoEditor.json", "w", encoding='utf-8') as f:
-        json.dump(json_object, f, indent=4, ensure_ascii=False)
-                
+def actionAddVoice(inFile, outFile, param):
+    return buildCmd("addVoice", param, inFile, outFile)
 
 def checkVideoMute(file):
     item_list = None
@@ -893,6 +821,41 @@ def matchVideoTime(audioLibPath, videoTime):
     # not found
     return None
 
+def matchVideoTime_new(audioLibPath, videoTime, outputPath):
+    # get all audio file
+    if os.path.exists(audioLibPath):
+        audioFileList = getFileByPath(audioLibPath)          
+    else:
+        print("no this %s folder" % audioLibPath)
+        return None
+
+    nTime = 0
+    while True:
+        if nTime > 2*len(audioFileList):
+            return None
+        nTime = nTime + 1
+        randomNum = random.randint(0, len(audioFileList)-1)
+        audioFile = audioFileList[randomNum]
+        print(audioFile)
+        audioTime = getAVDuration(audioFile)
+        if (audioFile[-4:].upper() != ".MP3") or (audioTime < videoTime):
+            continue
+        outputFile1 = os.path.join(outputPath, os.path.basename(audioFile))
+        cmd = '%s -ss 0 -i "%s" -t %s -c:a copy -y "%s"' % (os.path.join(os.path.abspath('.'), 'bin','ffmpeg.exe'),\
+            audioFile, videoTime, outputFile1)
+        print(cmd)
+        os.system(cmd)
+        outputFile2 = outputFile1 + '.mp3'
+        cmd = '%s -i "%s" -af "afade=t=out:st=%s:d=3" -y "%s"' % (os.path.join(os.path.abspath('.'), 'bin','ffmpeg.exe'),\
+            outputFile1, videoTime-3, outputFile2)
+        print(cmd)
+        os.system(cmd)
+        # p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        # p.wait()
+
+        return outputFile2
+
+
 def getFileByPath(path):
     '''
     get full path file 
@@ -906,11 +869,6 @@ def getFileByPath(path):
     return fileList
 
 def matchTime(videoTime, audioTime):
-    # if abs(outTime-inTime) < 2:
-    #     return True
-    # else:
-    #     return False
-
     if (videoTime > audioTime) and (videoTime - audioTime <= 2):
         return True
     else:
@@ -945,11 +903,20 @@ def levelJson(jsonData, objLevel, curLevel=0):
         
 if __name__ == '__main__':
     # parseStrategy("E:/work/创业之路/音视频技术/科大讯飞/FFmpeg特效库/dev/strategy.json")
-    # parseStrategy("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
-    # handleAutoEdit("G:/视频剪辑/2017-07-08-财政局/切片目录/特写相机/集锦/strategy.json")
-    parseStrategy_new("H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.08.22][等级3][进球]/strategy.json")
-    handleAutoEdit_new("H:/2017-05-27-延河杯 延八 延九/等级3/[2上半场0.08.22][等级3][进球]/strategy.json")
-    # addMusic("H:/八喜/strategy.json")
+    # parseStrategy("//Ybserver_one/集锦/strategy.json")
+    # handleAutoEdit("//Ybserver_one/集锦/strategy.json")
+    # parseStrategy_new("//Ybserver_one/集锦/strategy.json")
+    # handleAutoEdit_new("//Ybserver_one/集锦/strategy.json")
+    # print("hello")
+    # #
+    result = parseStrategy_new("\\\\Ybserver_one\\视频剪辑\\test\\集锦\\strategy.json")
+    print(result)
+    # result = diffAutoEditFile_new("E:/output/2017-08-27-阿里巴巴VS微博/集锦/strategy.json")
+    # print(result)
+    # result = handleAutoEdit_new(result)
+    # print(result)
+    # addMusic("E:/output/2017-08-27-阿里巴巴VS微博/集锦/strategy.json")
     # test()
     # print(checkVideoMute("H:/auto_tool_test/output/"))
+    # getAVDuration("clip.mp4")
 

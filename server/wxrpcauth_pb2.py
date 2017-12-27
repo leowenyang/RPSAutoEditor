@@ -19,9 +19,8 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='wxrpcauth.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x0fwxrpcauth.proto\"\x1b\n\x0b\x41uthRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1c\n\tAuthReply\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1d\n\nByteReplay\x12\x0f\n\x07message\x18\x01 \x01(\x0c\x32\xcc\x02\n\x06wxAuth\x12\x30\n\x12\x63heckClientVersion\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\x31\n\x13\x63heckClient2Version\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\x30\n\x12\x63heckServerVersion\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\'\n\twxRPCAuth\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12*\n\x0bgetWxBotKey\x12\x0c.AuthRequest\x1a\x0b.ByteReplay\"\x00\x12(\n\ncheckWxBot\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12,\n\x0e\x43\x61llAutoEditor\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x0fwxrpcauth.proto\"\x1b\n\x0b\x41uthRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1c\n\tAuthReply\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1d\n\nByteReplay\x12\x0f\n\x07message\x18\x01 \x01(\x0c\x32\xf7\x02\n\x06wxAuth\x12\x30\n\x12\x63heckClientVersion\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\x31\n\x13\x63heckClient2Version\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\x30\n\x12\x63heckServerVersion\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12\'\n\twxRPCAuth\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12*\n\x0bgetWxBotKey\x12\x0c.AuthRequest\x1a\x0b.ByteReplay\"\x00\x12(\n\ncheckWxBot\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12,\n\x0e\x43\x61llAutoEditor\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x12)\n\x0brunAEScript\x12\x0c.AuthRequest\x1a\n.AuthReply\"\x00\x62\x06proto3')
 )
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
 
@@ -121,6 +120,7 @@ _BYTEREPLAY = _descriptor.Descriptor(
 DESCRIPTOR.message_types_by_name['AuthRequest'] = _AUTHREQUEST
 DESCRIPTOR.message_types_by_name['AuthReply'] = _AUTHREPLY
 DESCRIPTOR.message_types_by_name['ByteReplay'] = _BYTEREPLAY
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 AuthRequest = _reflection.GeneratedProtocolMessageType('AuthRequest', (_message.Message,), dict(
   DESCRIPTOR = _AUTHREQUEST,
@@ -143,6 +143,93 @@ ByteReplay = _reflection.GeneratedProtocolMessageType('ByteReplay', (_message.Me
   ))
 _sym_db.RegisterMessage(ByteReplay)
 
+
+
+_WXAUTH = _descriptor.ServiceDescriptor(
+  name='wxAuth',
+  full_name='wxAuth',
+  file=DESCRIPTOR,
+  index=0,
+  options=None,
+  serialized_start=110,
+  serialized_end=485,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='checkClientVersion',
+    full_name='wxAuth.checkClientVersion',
+    index=0,
+    containing_service=None,
+    input_type=_AUTHREQUEST,
+    output_type=_AUTHREPLY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='checkClient2Version',
+    full_name='wxAuth.checkClient2Version',
+    index=1,
+    containing_service=None,
+    input_type=_AUTHREQUEST,
+    output_type=_AUTHREPLY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='checkServerVersion',
+    full_name='wxAuth.checkServerVersion',
+    index=2,
+    containing_service=None,
+    input_type=_AUTHREQUEST,
+    output_type=_AUTHREPLY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='wxRPCAuth',
+    full_name='wxAuth.wxRPCAuth',
+    index=3,
+    containing_service=None,
+    input_type=_AUTHREQUEST,
+    output_type=_AUTHREPLY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='getWxBotKey',
+    full_name='wxAuth.getWxBotKey',
+    index=4,
+    containing_service=None,
+    input_type=_AUTHREQUEST,
+    output_type=_BYTEREPLAY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='checkWxBot',
+    full_name='wxAuth.checkWxBot',
+    index=5,
+    containing_service=None,
+    input_type=_AUTHREQUEST,
+    output_type=_AUTHREPLY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='CallAutoEditor',
+    full_name='wxAuth.CallAutoEditor',
+    index=6,
+    containing_service=None,
+    input_type=_AUTHREQUEST,
+    output_type=_AUTHREPLY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='runAEScript',
+    full_name='wxAuth.runAEScript',
+    index=7,
+    containing_service=None,
+    input_type=_AUTHREQUEST,
+    output_type=_AUTHREPLY,
+    options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_WXAUTH)
+
+DESCRIPTOR.services_by_name['wxAuth'] = _WXAUTH
 
 try:
   # THESE ELEMENTS WILL BE DEPRECATED.
@@ -196,6 +283,11 @@ try:
           )
       self.CallAutoEditor = channel.unary_unary(
           '/wxAuth/CallAutoEditor',
+          request_serializer=AuthRequest.SerializeToString,
+          response_deserializer=AuthReply.FromString,
+          )
+      self.runAEScript = channel.unary_unary(
+          '/wxAuth/runAEScript',
           request_serializer=AuthRequest.SerializeToString,
           response_deserializer=AuthReply.FromString,
           )
@@ -254,6 +346,13 @@ try:
       context.set_details('Method not implemented!')
       raise NotImplementedError('Method not implemented!')
 
+    def runAEScript(self, request, context):
+      """runAEScript
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
 
   def add_wxAuthServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -289,6 +388,11 @@ try:
         ),
         'CallAutoEditor': grpc.unary_unary_rpc_method_handler(
             servicer.CallAutoEditor,
+            request_deserializer=AuthRequest.FromString,
+            response_serializer=AuthReply.SerializeToString,
+        ),
+        'runAEScript': grpc.unary_unary_rpc_method_handler(
+            servicer.runAEScript,
             request_deserializer=AuthRequest.FromString,
             response_serializer=AuthReply.SerializeToString,
         ),
@@ -332,6 +436,10 @@ try:
       context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
     def CallAutoEditor(self, request, context):
       """AutoEditor
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def runAEScript(self, request, context):
+      """runAEScript
       """
       context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
 
@@ -379,6 +487,11 @@ try:
       """
       raise NotImplementedError()
     CallAutoEditor.future = None
+    def runAEScript(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """runAEScript
+      """
+      raise NotImplementedError()
+    runAEScript.future = None
 
 
   def beta_create_wxAuth_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
@@ -394,6 +507,7 @@ try:
       ('wxAuth', 'checkServerVersion'): AuthRequest.FromString,
       ('wxAuth', 'checkWxBot'): AuthRequest.FromString,
       ('wxAuth', 'getWxBotKey'): AuthRequest.FromString,
+      ('wxAuth', 'runAEScript'): AuthRequest.FromString,
       ('wxAuth', 'wxRPCAuth'): AuthRequest.FromString,
     }
     response_serializers = {
@@ -403,6 +517,7 @@ try:
       ('wxAuth', 'checkServerVersion'): AuthReply.SerializeToString,
       ('wxAuth', 'checkWxBot'): AuthReply.SerializeToString,
       ('wxAuth', 'getWxBotKey'): ByteReplay.SerializeToString,
+      ('wxAuth', 'runAEScript'): AuthReply.SerializeToString,
       ('wxAuth', 'wxRPCAuth'): AuthReply.SerializeToString,
     }
     method_implementations = {
@@ -412,6 +527,7 @@ try:
       ('wxAuth', 'checkServerVersion'): face_utilities.unary_unary_inline(servicer.checkServerVersion),
       ('wxAuth', 'checkWxBot'): face_utilities.unary_unary_inline(servicer.checkWxBot),
       ('wxAuth', 'getWxBotKey'): face_utilities.unary_unary_inline(servicer.getWxBotKey),
+      ('wxAuth', 'runAEScript'): face_utilities.unary_unary_inline(servicer.runAEScript),
       ('wxAuth', 'wxRPCAuth'): face_utilities.unary_unary_inline(servicer.wxRPCAuth),
     }
     server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
@@ -431,6 +547,7 @@ try:
       ('wxAuth', 'checkServerVersion'): AuthRequest.SerializeToString,
       ('wxAuth', 'checkWxBot'): AuthRequest.SerializeToString,
       ('wxAuth', 'getWxBotKey'): AuthRequest.SerializeToString,
+      ('wxAuth', 'runAEScript'): AuthRequest.SerializeToString,
       ('wxAuth', 'wxRPCAuth'): AuthRequest.SerializeToString,
     }
     response_deserializers = {
@@ -440,6 +557,7 @@ try:
       ('wxAuth', 'checkServerVersion'): AuthReply.FromString,
       ('wxAuth', 'checkWxBot'): AuthReply.FromString,
       ('wxAuth', 'getWxBotKey'): ByteReplay.FromString,
+      ('wxAuth', 'runAEScript'): AuthReply.FromString,
       ('wxAuth', 'wxRPCAuth'): AuthReply.FromString,
     }
     cardinalities = {
@@ -449,6 +567,7 @@ try:
       'checkServerVersion': cardinality.Cardinality.UNARY_UNARY,
       'checkWxBot': cardinality.Cardinality.UNARY_UNARY,
       'getWxBotKey': cardinality.Cardinality.UNARY_UNARY,
+      'runAEScript': cardinality.Cardinality.UNARY_UNARY,
       'wxRPCAuth': cardinality.Cardinality.UNARY_UNARY,
     }
     stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
