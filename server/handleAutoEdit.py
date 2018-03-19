@@ -5,6 +5,7 @@ import os
 import json
 import subprocess
 import random
+import urllib.request
 
 from ffmpegwrapper.videoautoeditor import *
 from ffmpegwrapper.timerCounter import *
@@ -144,6 +145,27 @@ def test():
     # probe = FFProbeFactory('clip.mp4')
     # probe.getVideoLen()
 
+def checkFileExists(url):
+    if url.find('http://') == -1:
+        return os.path.exists(url)
+    
+    status = urllib.request.urlopen(url).code
+    print(status)
+    if status == 200:
+        return True
+    else:
+        return False
+
+def getBasenameFromUrl(url):
+    # baidu Bos file
+    if url.find('http://bj.bcebos.com') == -1:
+        return os.path.basename(url)
+    end = url.find("?authorization=")
+    url = url[:end]
+    start = url.rfind("/")
+    url = url[start+1:]
+    return url
+
 def addMusic(strategyFile):
     # handle config
     resultFile = ''
@@ -165,7 +187,7 @@ def addMusic(strategyFile):
         # jijinsucai
         # create temp fold
         tmpSaveFolder = ouputFolder+'/../../集锦'
-        if not os.path.exists(tmpSaveFolder):
+        if not checkFileExists(tmpSaveFolder):
             os.mkdir(tmpSaveFolder)
         # copy file
         # print(ouputFolder.split('\\')[-2])
@@ -212,7 +234,7 @@ def addMusic(strategyFile):
 
         # Save other folder
         tmpSaveFolder = ouputFolder+'/../../小片'
-        if not os.path.exists(tmpSaveFolder):
+        if not checkFileExists(tmpSaveFolder):
             os.mkdir(tmpSaveFolder)
         # copy file
         shutil.copyfile(resultFile2, os.path.join(tmpSaveFolder, os.path.basename(resultFile2)))
@@ -221,13 +243,13 @@ def addMusic(strategyFile):
         with open("config.conf", encoding='utf-8') as f:
             json_object = json.load(f)
             reviewFold = json_object['reviewFold']
-        if os.path.exists(reviewFold):
+        if checkFileExists(reviewFold):
             p,f = os.path.split(ouputFolder)
             p,f = os.path.split(p)
             p,f = os.path.split(p)
             p,f = os.path.split(p)
             reviewFold_output = os.path.join(reviewFold, f)
-            if not os.path.exists(reviewFold_output):
+            if not checkFileExists(reviewFold_output):
                 os.mkdir(reviewFold_output)
             shutil.copyfile(resultFile2, os.path.join(reviewFold_output, os.path.basename(resultFile2)))
 
@@ -258,7 +280,7 @@ def findClipDataByhash(hash, clipData):
 
 def diffAutoEditorFile(newFile, oldFile):
     # new diff json file
-    if os.path.exists(os.path.join(os.path.dirname(newFile),"autoEditor_diff.json")):
+    if checkFileExists(os.path.join(os.path.dirname(newFile),"autoEditor_diff.json")):
         os.remove(os.path.join(os.path.dirname(newFile),"autoEditor_diff.json"))
 
     diffJson = getJson(os.path.join(os.path.dirname(newFile),"autoEditor.json"))
@@ -271,7 +293,7 @@ def diffAutoEditorFile(newFile, oldFile):
             continue
         if ((oldClip['actionsHash'] == clip['actionsHash']) 
            and (clip['isMerge'] == '0')
-           and (os.path.exists(clip['outVideoFile']))):
+           and (checkFileExists(clip['outVideoFile']))):
             # set no handle
             diffJson['clips_handle'][diffJson['clips_handle'].index(clip)]['noChange'] = '1'
 
@@ -289,7 +311,7 @@ def diffAutoEditFile_new(strategyFile):
     ouputFolder = os.path.realpath(config['ouputFolder'])
 
     # check autoEditor file
-    if os.path.exists(ouputFolder + "/autoEditor_old.json"):
+    if checkFileExists(ouputFolder + "/autoEditor_old.json"):
         handleAEFile = diffAutoEditorFile(ouputFolder+"/autoEditor.json", ouputFolder + "/autoEditor_old.json")
     else:
         handleAEFile = ouputFolder+"/autoEditor.json"
@@ -385,7 +407,7 @@ def parseStrategy_new(strategyFile, num=1):
 
     clipDataList = []
     # check file is exsit
-    if not os.path.exists(strategyFile):
+    if not checkFileExists(strategyFile):
         resultList.append(strategyFile)
         return resultList
 
@@ -405,10 +427,10 @@ def parseStrategy_new(strategyFile, num=1):
         file = clip.get('file', "")
         camera = clip.get('camera', "").strip()
         actions = clip.get('actions', "")
-        baseName = os.path.basename(file)
+        baseName = getBasenameFromUrl(file)
 
         # check file is exsit
-        if not os.path.exists(file):
+        if not checkFileExists(file):
             resultList.append(file)
 
         # new clipData
@@ -542,7 +564,7 @@ def parseStrategy_new(strategyFile, num=1):
                     continue
 
                 # check file is exsit
-                if not os.path.exists(titlePng):
+                if not checkFileExists(titlePng):
                     resultList.append(titlePng)
 
                 outputFile = os.path.join(ouputFolder, baseName[:-4]+"_subtitle"+str(nClip)+str(nAction)+baseName[-4:])
@@ -556,7 +578,7 @@ def parseStrategy_new(strategyFile, num=1):
                 finalOutputFile = outputFile
             if 'add_pic' == cmd:
                 # check file is exsit
-                if not os.path.exists(param[0]):
+                if not checkFileExists(param[0]):
                     resultList.append(param[0])
 
                 # add picture
@@ -569,7 +591,7 @@ def parseStrategy_new(strategyFile, num=1):
                 finalOutputFile = outputFile
             if 'add_img' == cmd:
                 # check file is exsit
-                if not os.path.exists(param[0]):
+                if not checkFileExists(param[0]):
                     resultList.append(param[0])
 
                 # add img
@@ -631,7 +653,7 @@ def parseStrategy_new(strategyFile, num=1):
 
         if isAddLogo and logoFile != '':
             # check logo is exsit
-            if not os.path.exists(logoFile):
+            if not checkFileExists(logoFile):
                 resultList.append(logoFile)
 
             # videoLogo
@@ -682,8 +704,8 @@ def parseStrategy_new(strategyFile, num=1):
     for clip in clipDataList:
         json_object["clips_handle"].append(clip.__dict__)
 
-    if os.path.exists(ouputFolder + "/autoEditor.json"):
-        if os.path.exists(ouputFolder + "/autoEditor_old.json"):
+    if checkFileExists(ouputFolder + "/autoEditor.json"):
+        if checkFileExists(ouputFolder + "/autoEditor_old.json"):
             os.remove(ouputFolder + "/autoEditor_old.json")
         os.rename(ouputFolder + "/autoEditor.json", ouputFolder + "/autoEditor_old.json")
  
@@ -804,7 +826,7 @@ def getAVDuration(file):
 
 def matchVideoTime(audioLibPath, videoTime):
     # get all audio file
-    if os.path.exists(audioLibPath):
+    if checkFileExists(audioLibPath):
         audioFileList = getFileByPath(audioLibPath)          
     else:
         print("no this %s folder" % audioLibPath)
@@ -823,7 +845,7 @@ def matchVideoTime(audioLibPath, videoTime):
 
 def matchVideoTime_new(audioLibPath, videoTime, outputPath):
     # get all audio file
-    if os.path.exists(audioLibPath):
+    if checkFileExists(audioLibPath):
         audioFileList = getFileByPath(audioLibPath)          
     else:
         print("no this %s folder" % audioLibPath)
@@ -837,8 +859,10 @@ def matchVideoTime_new(audioLibPath, videoTime, outputPath):
         randomNum = random.randint(0, len(audioFileList)-1)
         audioFile = audioFileList[randomNum]
         print(audioFile)
+        if (audioFile[-4:].upper() != ".MP3"):
+            continue
         audioTime = getAVDuration(audioFile)
-        if (audioFile[-4:].upper() != ".MP3") or (audioTime < videoTime):
+        if (audioTime < videoTime):
             continue
         outputFile1 = os.path.join(outputPath, os.path.basename(audioFile))
         cmd = '%s -ss 0 -i "%s" -t %s -c:a copy -y "%s"' % (os.path.join(os.path.abspath('.'), 'bin','ffmpeg.exe'),\
@@ -909,8 +933,8 @@ if __name__ == '__main__':
     # handleAutoEdit_new("//Ybserver_one/集锦/strategy.json")
     # print("hello")
     # #
-    result = parseStrategy_new("\\\\Ybserver_one\\视频剪辑\\test\\集锦\\strategy.json")
-    print(result)
+    # result = parseStrategy_new("\\\\Ybserver_one\\视频剪辑\\test\\集锦\\strategy.json")
+    # print(result)
     # result = diffAutoEditFile_new("E:/output/2017-08-27-阿里巴巴VS微博/集锦/strategy.json")
     # print(result)
     # result = handleAutoEdit_new(result)
@@ -919,4 +943,8 @@ if __name__ == '__main__':
     # test()
     # print(checkVideoMute("H:/auto_tool_test/output/"))
     # getAVDuration("clip.mp4")
-
+    # result = checkFileExists("E:/work/创业之路/Vue/yunXUI/src/main.js")
+    # print(result)
+    # result = checkFileExists("http://yunedit.bj.bcebos.com/2018-02-01-3%2F20180201201411%2Fyouhou_recording_20180201201137.mp4")
+    # print(result)
+    print(getBasenameFromUrl("http://bj.bcebos.com/yunedit/2018-02-08-8/2018-02-08-20-13-42/youhou_recording_20180208200933.mp4?authorization=bce-auth-v1%2F4008bf94cec3456985732a43b18051a9%2F2018-02-09T11%3A06%3A49Z%2F1800%2Fhost%2Fa5e62a1ac2f4e56a3bbadff4e6969f928a91cccead9e2d66e404465d03f47ad6"))

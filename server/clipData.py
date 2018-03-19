@@ -3,6 +3,7 @@
 
 import os
 import hashlib
+import urllib.request
 
 class ClipData(object):
     """docstring for ClipData"""
@@ -18,9 +19,23 @@ class ClipData(object):
         self.noChange = '0'
         self.isMerge = '0'
 
+    def checkFileExists(self, url):
+        if url.find('http://') == -1:
+            return os.path.exists(url)
+        
+        status = urllib.request.urlopen(url).code
+        print(status)
+        if status == 200:
+            return True
+        else:
+            return False
+
     def setVideoFileHash(self, videoFile, salt=''):
         # self.inVideoFileHash = hashlib.md5(bytes(videoFile,encoding='utf-8')).hexdigest()
-        md5Result = self.md5sum(videoFile)
+        if videoFile.find('http://') == -1:
+            md5Result = self.md5sum(videoFile)
+        else:
+            md5Result = self.md5hex(videoFile)
         self.inVideoFileHash = self.md5hex(videoFile+md5Result+salt)
         return self.inVideoFileHash
 
@@ -44,6 +59,10 @@ class ClipData(object):
         outData = ''
         for action in self.actions:
             if action[0] == 'PIP_imgOnVideo':
+                outData += self.md5sum(action[2])
+            if action[0] == 'PIP_imgOnVideo_2':
+                outData += self.md5sum(action[2])
+            if action[0] == 'videoLogo':
                 outData += self.md5sum(action[2])
             for item in action:
                 outData += str(item)
@@ -72,7 +91,7 @@ class ClipData(object):
                 fh.seek(0)  
         m = hashlib.md5()  
         if isinstance(fname, str) \
-                and os.path.exists(fname):  
+                and self.checkFileExists(fname):  
             with open(fname, "rb") as fh:  
                 for chunk in read_chunks(fh):  
                     m.update(chunk)  

@@ -63,12 +63,15 @@ class FFMpegFactory(object):
     """
     def outputSarDar(self):
         # Output 
-        self.output.add_formatparam('-vf', 'setsar=1:1')
-        self.output.add_formatparam('-vf', 'setdar=16:9')
+        # self.output.add_formatparam('-vf', 'setsar=1:1')
+        # self.output.add_formatparam('-vf', 'setdar=16:9')
+        self.output.add_formatparam('-vf', 'setsar=1/1')
+        self.output.add_formatparam('-vf', 'setdar=16/9')
 
     def outputFormat(self):
         # Output
         #self.output.add_formatparam('-an', None)
+        # self.output.add_formatparam('-s', '1280x720')
         self.output.add_formatparam('-s', '1920x1080')
         self.output.add_formatparam('-r', '25')
         self.output.add_formatparam('-pix_fmt', 'yuv420p')
@@ -83,6 +86,7 @@ class FFMpegFactory(object):
     def mp4Format_2(self, fRate):
         # Output
         #self.output.add_formatparam('-an', None)
+        # self.output.add_formatparam('-s', '1280x720')
         self.output.add_formatparam('-s', '1920x1080')
         self.output.add_formatparam('-pix_fmt', 'yuv420p')
         self.output.add_formatparam('-c:v', 'libx264')
