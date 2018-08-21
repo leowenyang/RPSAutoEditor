@@ -20,23 +20,66 @@ from .timerCounter import *
 class FFProbeFactory(object):
     """docstring for FFProbeFactory"""
     def __init__(self, inFile):
-        self.input = Input(inFile)
+        self.input = Input2('"'+inFile+'"')
         self.input.add_formatparam('-hide_banner', None)
         self.output = Output(None)
 
     def getVideoLen(self):
-        self.input.add_formatparam('-print_format', 'ini')
-        self.input.add_formatparam('-show_format', None)
-        self.input.add_formatparam('-show_streams', None)
+        self.input.add_formatparam('-v', 'error')
+        self.input.add_formatparam('-show_entries', 'format=duration')
+        self.input.add_formatparam('-of', 'default=noprint_wrappers=1:nokey=1')
 
         result = self.run()
-        for item in result:
-            print(item)
+        print("-----------")
+        print(result)
+        print("-----------")
+        if len(result) == 1:
+            result = float(result[0].decode('utf-8'))
+        return result
 
-        # with open("videoInfo.json", "w", encoding='utf-8') as f:
-        #     f.write(str(result))
-        #     json.dump(result, f, indent=4, ensure_ascii=False)
-        # print(json.dumps(result))
+    def getVideoSize(self):
+        self.input.add_formatparam('-v', 'error')
+        self.input.add_formatparam('-show_entries', 'format=size')
+        self.input.add_formatparam('-of', 'default=noprint_wrappers=1:nokey=1')
+
+        result = self.run()
+        if len(result) == 1:
+            result = int(result[0].decode('utf-8'))
+        return result
+
+    def getVideoWidth(self):
+        self.input.add_formatparam('-v', 'error')
+        self.input.add_formatparam('-select_streams', 'v:0')
+        self.input.add_formatparam('-show_entries', 'stream=width')
+        self.input.add_formatparam('-of', 'default=noprint_wrappers=1:nokey=1')
+
+        result = self.run()
+        if len(result) == 1:
+            result = int(result[0].decode('utf-8'))
+        return result
+
+    def getVideoHeight(self):
+        self.input.add_formatparam('-v', 'error')
+        self.input.add_formatparam('-select_streams', 'v:0')
+        self.input.add_formatparam('-show_entries', 'stream=height')
+        self.input.add_formatparam('-of', 'default=noprint_wrappers=1:nokey=1')
+
+        result = self.run()
+        if len(result) == 1:
+            result = int(result[0].decode('utf-8'))
+        return result
+
+    def getVideoFrameRate(self):
+        self.input.add_formatparam('-v', 'error')
+        self.input.add_formatparam('-select_streams', 'v:0')
+        self.input.add_formatparam('-show_entries', 'stream=avg_frame_rate')
+        self.input.add_formatparam('-of', 'default=noprint_wrappers=1:nokey=1')
+
+        result = self.run()
+        if len(result) == 1:
+            result = result[0].decode('utf-8')
+            result = eval(result)
+        return result
 
     """
     Other Handle
@@ -56,13 +99,14 @@ class FFMpegFactory(object):
         # self.input.add_formatparam('-hwaccel', 'dxva2')
         # self.input.add_formatparam('-hwaccel', 'qsv')
         # self.input.add_formatparam('-threads', '4')
+        # self.input.add_formatparam('-xerror', None)
         self.output = Output('"'+outFile+'"')
-  
+
     """
     Video Handle
     """
     def outputSarDar(self):
-        # Output 
+        # Output
         # self.output.add_formatparam('-vf', 'setsar=1:1')
         # self.output.add_formatparam('-vf', 'setdar=16:9')
         self.output.add_formatparam('-vf', 'setsar=1/1')
@@ -77,7 +121,10 @@ class FFMpegFactory(object):
         self.output.add_formatparam('-pix_fmt', 'yuv420p')
         self.output.add_formatparam('-c:v', 'libx264')
         self.output.add_formatparam('-c:a', 'aac')
-        self.output.add_formatparam('-strict', '-2') 
+        self.output.add_formatparam('-strict', '-2')
+
+        self.output.add_formatparam('-vf', 'setsar=1/1')
+        self.output.add_formatparam('-vf', 'setdar=16/9')
 
         # self.output.add_formatparam('-c:v', 'h264_qsv')
         # self.output.add_formatparam('-look_ahead', '0')
@@ -92,7 +139,7 @@ class FFMpegFactory(object):
         self.output.add_formatparam('-c:v', 'libx264')
         self.output.add_formatparam('-c:a', 'aac')
         self.output.add_formatparam('-strict', '-2')
-        self.output.add_formatparam('-r', fRate) 
+        self.output.add_formatparam('-r', fRate)
 
     def mp4Format(self):
         # Output
@@ -126,24 +173,24 @@ class FFMpegFactory(object):
         # Output
         self.output.add_formatparam('-filter_complex', filter)
 
-    def showTime(self, frameRate, time ,startTime, endTime):
+    def showTime(self, frameRate, time ,startTime, endTime, posX=351, posY=117, fontSize=35, fontcolor='#FFFFFF'):
         # Output
         # time ('09\:57\:00\:00')
-        strFilter = "drawtext=fontfile=cour.ttf:fontsize=35:fontcolor=#FFFFFF:timecode='%s':r=%s:x=351:y=117:enable=between(t\,%s\,%s)" % (time, frameRate, startTime, endTime)
+        strFilter = "drawtext=fontfile=cour.ttf:fontsize=%s:fontcolor=%s:timecode='%s':r=%s:x=%s:y=%s:enable=between(t\,%s\,%s)" % (fontSize, fontcolor, time, frameRate, posX, posY, startTime, endTime)
         self.output.add_formatparam('-filter_complex', strFilter)
 
     def videoMerge(self):
         # Input
         self.input.add_formatparam('-f', 'concat')
         self.input.add_formatparam('-safe', '0')
-        
+
         # Output
         self.output.add_formatparam('-c', 'copy')
 
     def twoVideoMerge(self, videoLen, videFile, overlayDuring):
         # Input
         self.input.add_formatparam('-i', '"'+videFile+'"')
-        
+
         # Output
         if overlayDuring == 0:
             # all video slow
@@ -190,22 +237,22 @@ class FFMpegFactory(object):
         #filter_complex "overlay=0:0:enable=between(t,0,2)"
         # Input
         self.input.add_formatparam('-i', '"'+imgFile+'"')
-        
+
         # Output
         self.output.add_formatparam('-c:v', 'libx264')
         self.output.add_formatparam('-c:a', 'copy')
         self.output.add_formatparam('-strict', '-2')
         # strFilter = '[0:v]scale=180:80[logo];'\
-        #             '[1:v][logo]overlay=main_w-overlay_w-10:main_h-overlay_h-10[out]' 
+        #             '[1:v][logo]overlay=main_w-overlay_w-10:main_h-overlay_h-10[out]'
         # strFilter = '[1:v][0:v]overlay=main_w-overlay_w-10:main_h-overlay_h-10[out]'
-        strFilter = '[1:v][0:v]overlay=0:0[out]' 
+        strFilter = '[1:v][0:v]overlay=0:0[out]'
         self.output.add_formatparam('-filter_complex', strFilter)
         self.output.add_formatparam('-map', '[out]')
 
     def videoToOneImg(self, time):
         # Input
         self.input.add_formatparam('-ss', time)
-        
+
         # Output
         self.output.add_formatparam('-f', 'image2')
         self.output.add_formatparam('-vframes', '1')
@@ -213,7 +260,7 @@ class FFMpegFactory(object):
     def videoEndToOneImg(self, time):
         # Input
         self.input.add_formatparam('-sseof', time)
-        
+
         # Output
         self.output.add_formatparam('-f', 'image2')
         self.output.add_formatparam('-vframes', '1')
@@ -222,7 +269,7 @@ class FFMpegFactory(object):
         # Input
         self.input.add_formatparam('-loop', '1')
         self.input.add_formatparam('-f', 'image2')
-        
+
         # Output
         self.output.add_formatparam('-t', time)
 
@@ -255,21 +302,21 @@ class FFMpegFactory(object):
             during = 1
         else:
             during = 0.5
-        
+
         # Output
         strFilter = '[0:0]format=rgba,fade=in:st=%s:d=%s:alpha=1,fade=out:st=%s:d=%s:alpha=1[img];'\
                     '[1:0][img]overlay=0:0:shortest=1[out]'\
                      % (start, during, end, during)
         self.output.add_formatparam('-filter_complex', strFilter)
         self.output.add_formatparam('-map', '[out]')
-    
+
     def PIP_imgOnVideo_2(self, imgFile, start, end):
         # Input
         self.input.add_formatparam('-loop', '1')
         self.input.add_formatparam('-i', '"'+imgFile+'"')
 
         # during = 0
-        
+
         # # Output
         # strFilter = '[0:0]format=rgba,fade=in:st=%s:d=%s:alpha=1,fade=out:st=%s:d=%s:alpha=1[img];'\
         #             '[1:0][img]overlay=0:0:shortest=1[out]'\
@@ -334,7 +381,7 @@ class FFMpegFactory(object):
 
     def cameraMove(self, x, y, frameRate):
         # Output
-        strFilter = 'zoompan=z="1+in/800":d=1:x=%s:y=%s:fps=%s' % (x, y, frameRate)
+        strFilter = 'zoompan=z="1+in/800":s=1920x1080:d=1:x=%s:y=%s:fps=%s' % (x, y, frameRate)
         #strFilter = "zoompan=z='1+in/1000':d=1:y='if(gte(zoom,1.5),y,y+1)':x='x'"
         self.output.add_formatparam('-filter_complex', strFilter)
         # self.mp4Format_2('60')
@@ -435,7 +482,7 @@ class FFMpegFactory(object):
         self.input.add_formatparam('-ss', '0')
         self.input.add_formatparam('-accurate_seek', None)
 
-        
+
         # Output
         self.output.add_formatparam('-t', during)
         self.output.add_formatparam('-avoid_negative_ts', '1')
@@ -459,7 +506,8 @@ class FFMpegFactory(object):
     def transVideoRate(self, rate):
         # Output
         self.output.add_formatparam('-b', rate)
-        
+        self.output.add_formatparam('-movflags', 'faststart')
+
     """
     Subtitle Handle
     """
@@ -484,6 +532,9 @@ class VideoAutoEditor():
         self.timerCounter = CountingTimer()
 
     def getFrameRate(self, file):
+        # probe = FFProbeFactory(file)
+        # return probe.getVideoFrameRate()
+
         item_list = None
         cmd = '%s -i "%s"' % (os.path.join(os.path.abspath('.'), 'bin','ffmpeg.exe'),file)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
@@ -501,8 +552,7 @@ class VideoAutoEditor():
                 begin_index = item.find("kb/s,")
                 end_index = item.find("fps")
                 frmateRate = item[begin_index + 5: end_index].strip()
-
-        return frmateRate
+                return frmateRate
 
     def checkVideoMute(self, file):
         item_list = None
@@ -526,6 +576,9 @@ class VideoAutoEditor():
         Get Video/Audio total time (s)
         :param file: video/audio file
         '''
+        # probe = FFProbeFactory(file)
+        # return probe.getVideoLen()
+
         item_list = None
         cmd = '%s -i "%s"' % (os.path.join(os.path.abspath('.'), 'bin','ffmpeg.exe'),file)
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
@@ -548,7 +601,7 @@ class VideoAutoEditor():
                 duration = duration[ : duration.find(".")]
                 duration = duration.split(':')
                 duration = int(duration[0])*3600 + int(duration[1])*60 + int(duration[2])+float(microTime)
-           
+
         return duration
 
     def videoCut(self, listParam):
@@ -562,7 +615,7 @@ class VideoAutoEditor():
             print("COMMAND: cut -> param format invalid")
             print("['cut', 'inFile', 'start', 'during', 'outFile']")
             return 1
-        
+
         # handle
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         ffmpegManger.videoCut(listParam[2], listParam[3])
@@ -582,7 +635,7 @@ class VideoAutoEditor():
             print("COMMAND: videoCut_a -> param format invalid")
             print("['videoCut_a', 'inFile', 'start', 'during', 'outFile']")
             return 1
-        
+
         # handle
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         ffmpegManger.videoCut(listParam[2], listParam[3])
@@ -731,7 +784,7 @@ class VideoAutoEditor():
 
         # -1 mean to get last frame from video
         if listParam[2] == '-1':
-            listParam[2] = self.getVideoLen(listParam[1])  
+            listParam[2] = self.getVideoLen(listParam[1])
 
         # handle
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
@@ -883,7 +936,7 @@ class VideoAutoEditor():
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         ffmpegManger.addSubtitle("tmpSubtitle.txt")
         result = ffmpegManger.run()
-        
+
         os.remove("tmpSubtitle.txt")
         return result
 
@@ -1008,10 +1061,10 @@ class VideoAutoEditor():
 
         outputPath = os.path.dirname(listParam[-1])
         print(">>>>>", outputPath)
-        
+
         # step 1  -> get audio from video
         if self.checkVideoMute(listParam[1]):
-            ffmpegManger = FFMpegFactory(os.path.join(os.path.abspath('.'), 'bin','null.mp3'), 
+            ffmpegManger = FFMpegFactory(os.path.join(os.path.abspath('.'), 'bin','null.mp3'),
                 os.path.join(outputPath, "step1.mp3"))
             videoLen = self.getVideoLen(listParam[1])
             ffmpegManger.creatMuteAudio(videoLen)
@@ -1064,7 +1117,7 @@ class VideoAutoEditor():
         handle : ['showTime', 'videoFile', 'time', 'startTime', 'endTime', 'outFile']
         """
         # check Param
-        if len(listParam) != 6:
+        if not (len(listParam) == 6 or len(listParam) == 8 or len(listParam) == 9 or len(listParam) == 10):
             print(listParam)
             print("COMMAND: showTime -> param format invalid")
             print("['showTime', 'videoFile', 'time', 'startTime', 'endTime', 'outFile']")
@@ -1074,7 +1127,15 @@ class VideoAutoEditor():
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         frameRate = self.getFrameRate(listParam[1])
         time = self.formatTime(listParam[2])
-        ffmpegManger.showTime(frameRate, time, listParam[3], listParam[4])
+
+        if len(listParam) == 6:
+            ffmpegManger.showTime(frameRate, time, listParam[3], listParam[4])
+        if len(listParam) == 8:
+            ffmpegManger.showTime(frameRate, time, listParam[3], listParam[4], listParam[5], listParam[6])
+        if len(listParam) == 9:
+            ffmpegManger.showTime(frameRate, time, listParam[3], listParam[4], listParam[5], listParam[6], listParam[7])
+        if len(listParam) == 10:
+            ffmpegManger.showTime(frameRate, time, listParam[3], listParam[4], listParam[5], listParam[6], listParam[7], listParam[8])
         result = ffmpegManger.run()
         return result
 
@@ -1150,7 +1211,7 @@ class VideoAutoEditor():
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         ffmpegManger.transVideoRate('1.6M')
         result = ffmpegManger.run()
-        return result    
+        return result
 
     def addMergeMusic(self, listParam):
         """
@@ -1261,7 +1322,7 @@ class VideoAutoEditor():
         # counter time
         self.timerCounter.begin()
 
-        # handle 
+        # handle
         print(listParam)
         result = eval("self."+listParam[0])(listParam)
         print('command handle result is :', result)
@@ -1299,6 +1360,6 @@ class VideoAutoEditor():
 def main():
     editor = VideoAutoEditor()
     editor.run()
-        
+
 if __name__ == '__main__':
     main()

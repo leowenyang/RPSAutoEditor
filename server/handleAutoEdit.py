@@ -17,9 +17,15 @@ def test():
     # during = editor.creatMuteAudio("clip.mp4")
     # print(during)
 
-    handle = ['addVoice', 'clip.mp4', '1', '3', 'clip_voice.mp4']
-    editor = VideoAutoEditor()
-    editor.addVoice(handle)
+    probe = FFProbeFactory("\\\\192.168.0.140\\忆球工具\\自动化剪辑素材\\通用背景音乐\\Linkin Park-New Divide(《变形金刚2》电影主题曲).mp3")
+    len = probe.getVideoLen()
+    print(1)
+    print(len)
+    print(2)
+
+    # handle = ['addVoice', 'clip.mp4', '1', '3', 'clip_voice.mp4']
+    # editor = VideoAutoEditor()
+    # editor.addVoice(handle)
 
     # handle = ['showTime', 'clip.mp4', '00\:00\:03\:00', '4', '8', 'out.mp4']
     # editor = VideoAutoEditor()
@@ -36,7 +42,7 @@ def test():
     # handle = ['splitAudio', '04.mp4', '04.mp3']
     # editor = VideoAutoEditor()
     # editor.splitAudio(handle)
-    
+
     # 'contrast', 'brightness', 'saturation'
     # handle = ['videoCBS', '04.mp4', '1', '0', '1', '04_color.mp4']
     # editor = VideoAutoEditor()
@@ -148,7 +154,7 @@ def test():
 def checkFileExists(url):
     if url.find('http://') == -1:
         return os.path.exists(url)
-    
+
     status = urllib.request.urlopen(url).code
     print(status)
     if status == 200:
@@ -160,7 +166,10 @@ def getBasenameFromUrl(url):
     # baidu Bos file
     if url.find('http://bj.bcebos.com') == -1:
         return os.path.basename(url)
-    end = url.find("?authorization=")
+    if url.endswith('mp4'):
+        end = len(url)
+    else :
+        end = url.find("?authorization=")
     url = url[:end]
     start = url.rfind("/")
     url = url[start+1:]
@@ -291,7 +300,7 @@ def diffAutoEditorFile(newFile, oldFile):
 
         if not oldClip:
             continue
-        if ((oldClip['actionsHash'] == clip['actionsHash']) 
+        if ((oldClip['actionsHash'] == clip['actionsHash'])
            and (clip['isMerge'] == '0')
            and (checkFileExists(clip['outVideoFile']))):
             # set no handle
@@ -344,37 +353,6 @@ def handleAutoEdit_new(handleAEFile, idType='0'):
     print("total spend %s s" % (timerCounter.diff()[0]))
     return 0
 
-# def handleAutoEdit_new(strategyFile):
-#     # counter time
-#     timerCounter = CountingTimer()
-#     timerCounter.begin()
-
-#     # handle config
-#     config = getJson(strategyFile, "config")
-#     ouputFolder = os.path.realpath(config['ouputFolder'])
-
-#     # check autoEditor file
-#     if os.path.exists(ouputFolder + "/autoEditor_old.json"):
-#         handleAEFile = diffAutoEditorFile(ouputFolder+"/autoEditor.json", ouputFolder + "/autoEditor_old.json")
-#     else:
-#         handleAEFile = ouputFolder+"/autoEditor.json"
-
-#     editor = VideoAutoEditor()
-#     clips = getJson(handleAEFile, "clips_handle")
-#     for clip in clips:
-#         if clip['noChange'] == '1':
-#             continue
-#         for action in clip['actions']:
-#             result = editor.handleCmd(action)
-#             # command error
-#             if result == 1:
-#                 return 1
-
-#     # counter time
-#     timerCounter.end()
-#     print("total spend %s s" % (timerCounter.diff()[0]))
-#     return 0
-
 def transCBS(contrast, brightness, saturation):
     param = []
     # contrast [-100, 100, 0] -> [0, 2, 1]
@@ -400,7 +378,6 @@ def transCBS(contrast, brightness, saturation):
 
     return param
 
-# def parseStrategy_new(strategyFile):
 def parseStrategy_new(strategyFile, num=1):
     # result
     resultList = []
@@ -497,7 +474,7 @@ def parseStrategy_new(strategyFile, num=1):
                 clipData.addAction(actionFormat(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
-                finalOutputFile = outputFile  
+                finalOutputFile = outputFile
             if 'addstar' == cmd:
                 lastOutputFile = finalOutputFile
 
@@ -535,20 +512,20 @@ def parseStrategy_new(strategyFile, num=1):
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
-            if 'camera_move' == cmd:
-                # cameraMove
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_camera"+str(nClip)+str(nAction)+baseName[-4:])
-                clipData.addAction(actionCameraMove(finalOutputFile, outputFile, param))
-                clipData.setOutVideoFile(outputFile)
-                # clipData.setOutAudioFile()
-                finalOutputFile = outputFile
+            # if 'camera_move' == cmd:
+            #     # cameraMove
+            #     outputFile = os.path.join(ouputFolder, baseName[:-4]+"_camera"+str(nClip)+str(nAction)+baseName[-4:])
+            #     clipData.addAction(actionCameraMove(finalOutputFile, outputFile, param))
+            #     clipData.setOutVideoFile(outputFile)
+            #     # clipData.setOutAudioFile()
+            #     finalOutputFile = outputFile
 
-                # rmShaky
-                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_rmshaky"+str(nClip)+str(nAction)+baseName[-4:])
-                clipData.addAction(actionRmShaky(finalOutputFile, outputFile, param))
-                clipData.setOutVideoFile(outputFile)
-                # clipData.setOutAudioFile()
-                finalOutputFile = outputFile
+            #     # rmShaky
+            #     outputFile = os.path.join(ouputFolder, baseName[:-4]+"_rmshaky"+str(nClip)+str(nAction)+baseName[-4:])
+            #     clipData.addAction(actionRmShaky(finalOutputFile, outputFile, param))
+            #     clipData.setOutVideoFile(outputFile)
+            #     # clipData.setOutAudioFile()
+            #     finalOutputFile = outputFile
             if 'slow_motion' == cmd:
                 # videoSpeed
                 if param[4] == 1:
@@ -619,6 +596,8 @@ def parseStrategy_new(strategyFile, num=1):
                 finalOutputFile = outputFile
             if 'add_filter' == cmd:
                 # add filter
+                if (param == None or len(param) == 0):
+                    continue
                 outputFile = os.path.join(ouputFolder, baseName[:-4]+"_filter"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionAddFilter(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
@@ -669,7 +648,7 @@ def parseStrategy_new(strategyFile, num=1):
             if not isHaveAudio:
                 clipData.addAction(actionCreateMuteAudio(clipData.outAudioFile, audioOutputFile, []))
             else:
-                clipData.addAction(actionSplitAudio(clipData.outAudioFile, audioOutputFile, []))  
+                clipData.addAction(actionSplitAudio(clipData.outAudioFile, audioOutputFile, []))
             clipData.setOutAudioFile(audioOutputFile)
 
             # merge video and audio
@@ -708,7 +687,7 @@ def parseStrategy_new(strategyFile, num=1):
         if checkFileExists(ouputFolder + "/autoEditor_old.json"):
             os.remove(ouputFolder + "/autoEditor_old.json")
         os.rename(ouputFolder + "/autoEditor.json", ouputFolder + "/autoEditor_old.json")
- 
+
     with open(ouputFolder + "/autoEditor.json", "w", encoding='utf-8') as f:
         json.dump(json_object, f, indent=4, ensure_ascii=False)
 
@@ -769,7 +748,7 @@ def actionLogo(inFile, outFile, param):
 
 def actionSetCBS(inFile, outFile, param):
     return buildCmd("videoCBS", param, inFile, outFile)
-    
+
 def actionAddFilter(inFile, outFile, param):
     return buildCmd("addFilter", param, inFile, outFile)
 
@@ -801,6 +780,8 @@ def getAVDuration(file):
     Get Video/Audio total time (s)
     :param file: video/audio file
     '''
+    # probe = FFProbeFactory(file)
+    # return probe.getVideoLen()
     item_list = None
     cmd = '%s -i "%s"' % (os.path.join(os.path.abspath('.'), 'bin','ffmpeg.exe'),file)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
@@ -821,13 +802,13 @@ def getAVDuration(file):
             duration = duration[ : duration.find(".")]
             duration = duration.split(':')
             duration = int(duration[0])*3600 + int(duration[1])*60 + int(duration[2])
-       
+
     return duration
 
 def matchVideoTime(audioLibPath, videoTime):
     # get all audio file
     if checkFileExists(audioLibPath):
-        audioFileList = getFileByPath(audioLibPath)          
+        audioFileList = getFileByPath(audioLibPath)
     else:
         print("no this %s folder" % audioLibPath)
         return None
@@ -846,7 +827,7 @@ def matchVideoTime(audioLibPath, videoTime):
 def matchVideoTime_new(audioLibPath, videoTime, outputPath):
     # get all audio file
     if checkFileExists(audioLibPath):
-        audioFileList = getFileByPath(audioLibPath)          
+        audioFileList = getFileByPath(audioLibPath)
     else:
         print("no this %s folder" % audioLibPath)
         return None
@@ -862,6 +843,8 @@ def matchVideoTime_new(audioLibPath, videoTime, outputPath):
         if (audioFile[-4:].upper() != ".MP3"):
             continue
         audioTime = getAVDuration(audioFile)
+        print(audioTime)
+        print(videoTime)
         if (audioTime < videoTime):
             continue
         outputFile1 = os.path.join(outputPath, os.path.basename(audioFile))
@@ -882,14 +865,14 @@ def matchVideoTime_new(audioLibPath, videoTime, outputPath):
 
 def getFileByPath(path):
     '''
-    get full path file 
+    get full path file
     '''
     files = os.listdir(path)
     fileList = []
     for fileName in files:
         fullFileName = os.path.join(path, fileName)
         fileList.append(fullFileName)
- 
+
     return fileList
 
 def matchTime(videoTime, audioTime):
@@ -924,22 +907,8 @@ def levelJson(jsonData, objLevel, curLevel=0):
                 levelJson(jsonData[item], objLevel, curLevel=curLevel+1)
     else:
         print("Is not json object!")
-        
+
 if __name__ == '__main__':
-    # parseStrategy("E:/work/创业之路/音视频技术/科大讯飞/FFmpeg特效库/dev/strategy.json")
-    # parseStrategy("//Ybserver_one/集锦/strategy.json")
-    # handleAutoEdit("//Ybserver_one/集锦/strategy.json")
-    # parseStrategy_new("//Ybserver_one/集锦/strategy.json")
-    # handleAutoEdit_new("//Ybserver_one/集锦/strategy.json")
-    # print("hello")
-    # #
-    # result = parseStrategy_new("\\\\Ybserver_one\\视频剪辑\\test\\集锦\\strategy.json")
-    # print(result)
-    # result = diffAutoEditFile_new("E:/output/2017-08-27-阿里巴巴VS微博/集锦/strategy.json")
-    # print(result)
-    # result = handleAutoEdit_new(result)
-    # print(result)
-    # addMusic("E:/output/2017-08-27-阿里巴巴VS微博/集锦/strategy.json")
     # test()
     # print(checkVideoMute("H:/auto_tool_test/output/"))
     # getAVDuration("clip.mp4")
@@ -947,4 +916,10 @@ if __name__ == '__main__':
     # print(result)
     # result = checkFileExists("http://yunedit.bj.bcebos.com/2018-02-01-3%2F20180201201411%2Fyouhou_recording_20180201201137.mp4")
     # print(result)
-    print(getBasenameFromUrl("http://bj.bcebos.com/yunedit/2018-02-08-8/2018-02-08-20-13-42/youhou_recording_20180208200933.mp4?authorization=bce-auth-v1%2F4008bf94cec3456985732a43b18051a9%2F2018-02-09T11%3A06%3A49Z%2F1800%2Fhost%2Fa5e62a1ac2f4e56a3bbadff4e6969f928a91cccead9e2d66e404465d03f47ad6"))
+    #print(getBasenameFromUrl("http://bj.bcebos.com/yunedit/2018-02-08-8/2018-02-08-20-13-42/youhou_recording_20180208200933.mp4?authorization=bce-auth-v1%2F4008bf94cec3456985732a43b18051a9%2F2018-02-09T11%3A06%3A49Z%2F1800%2Fhost%2Fa5e62a1ac2f4e56a3bbadff4e6969f928a91cccead9e2d66e404465d03f47ad6"))
+    #parseStrategy_new("//Ybserver_one/视频剪辑/万科/万科业主06/集锦/strategy.json")
+    file = "//Ybserver_one/视频剪辑/滴滴篮球/DiBA05/04.精彩(2上0.02.15)(主-J&Y)[进球]《入集》/strategy_xiaopian.json"
+    parseStrategy_new(file)
+    aeScript = diffAutoEditFile_new(file)
+    handleAutoEdit_new(aeScript)
+    addMusic(file)

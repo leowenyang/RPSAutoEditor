@@ -41,6 +41,22 @@ class Input(ParameterContainer):
         return chain(ParameterContainer.__iter__(self),
                      ['-i', self.file_path])
 
+class Input2(ParameterContainer):
+    """Container for an input file.
+
+    :param file_path: Path to the input file
+    :param args: A list of Containers that should be appended
+    """
+
+    def __init__(self, file_path, *args):
+        # print("init")
+        self.file_path = file_path
+        ParameterContainer.__init__(self, *args)
+
+    def __iter__(self):
+        # print("iter")
+        return chain(ParameterContainer.__iter__(self),
+                     [self.file_path])
 
 class Output(ParameterContainer):
     """Container for an output file.
@@ -198,100 +214,6 @@ class FFmpeg(ParameterContainer):
     def __str__(self):
         return" ".join(self)
 
-class FFProbeProcess(object):
-    """Class to exectute FFProbe.
-
-    :param command: a sequence of the binary and it arguments
-    """
-
-    def __init__(self, command):
-        self.command = list(command)
-        self.queue = Queue(maxsize=2000)
-        self.process = None
-
-    def _queue_output(self, out, queue):
-        """Read the output from the command bytewise. On every newline
-        the line is put to the queue."""
-        line = bytearray()
-        running = self.running
-
-        while running:
-            byte = out.read(1)
-            if byte == b'':
-                running = self.running
-                continue
-            line += byte
-            if byte in (b'\n', b'\r'):
-                queue.put(''.join(line.decode('utf8')), timeout=0.4)
-                line = bytearray()
-        out.close()
-
-    def run(self, daemon=True):
-        """Executes the command. A thread will be started to collect
-        the outputs (stderr and stdout) from that command.
-        The outputs will be written to the queue.
-
-        :return: self
-        """
-        # print(self.command)
-        print((" ".join(self.command)))
-        os.system(" ".join(self.command))
-
-        # p = Popen(self.command, stdout=PIPE, stderr=STDOUT, shell=True)
-        # p.wait()
-        # item_list = p.stdout.read().splitlines()
-        # # item_list = p.stdout.read()
-        # return item_list
-
-        # self.process = Popen(" ".join(self.command), stdin=PIPE, stdout=PIPE, stderr=STDOUT)
-        # self.process.wait()
-
-        # self.process = Popen(self.command, bufsize=0,
-        #              stdin=PIPE, stdout=PIPE, stderr=STDOUT)
-        # thread = Thread(target=self._queue_output,
-        #                 args=(self.process.stdout, self.queue))
-        # thread.deamon = daemon
-        # thread.start()
-        return self
-
-    @property
-    def running(self):
-        return self.process.poll() is None
-
-    @property
-    def successful(self):
-        return self.process.returncode == 0
-
-    @property
-    def failed(self):
-        return not (self.successful or self.running)
-
-    def readlines(self, keepends=False):
-        """Yield lines from the queue that were collected from the
-        command. You can specify if you want to keep newlines at the ends.
-        Default is to drop them.
-
-        :param keepends: keep the newlines at the end. Default=False
-        """
-        running = self.process.poll() is None
-        while running or self.queue.qsize():
-            try:
-                line = self.queue.get(timeout=0.05)
-                if keepends:
-                    yield line
-                else:
-                    yield line.rstrip('\r\n')
-            except Empty:
-                running = self.process.poll() is None
-
-    def __getattr__(self, name):
-        if self.process:
-            return getattr(self.process, name)
-        raise AttributeError
-
-    def __iter__(self):
-        return self.readlines()
-
 class FFProbe(ParameterContainer):
     """This class represents the FFProbe command.
 
@@ -307,6 +229,7 @@ class FFProbe(ParameterContainer):
     def __init__(self, binary='ffprobe', *args):
         self.binary = binary
         self.process = None
+        self.command = None
         ParameterContainer.__init__(self, *args)
 
     def add_parameter(self, key, value):
@@ -319,7 +242,11 @@ class FFProbe(ParameterContainer):
 
         :return: :class:`FFProbeProcess` object with `run()` invoked
         """
-        return FFProbeProcess(self).run()
+        self.command = list(self)
+        print(self.command)
+        p = subprocess.Popen(self.command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        p.wait()
+        return p.stdout.read().splitlines()
 
     def __enter__(self):
         self.process = self.run()

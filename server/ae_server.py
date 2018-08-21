@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import time
+import requests
+import traceback
 from concurrent import futures
 from pkg_resources import *
 
@@ -13,8 +15,25 @@ from handleAutoEdit import *
 import json
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+YUN_ADMIN_SERVER_URL = 'http://180.76.189.114:4545'
 
-SERVER_VERSION = "1.0.36"
+SERVER_VERSION = "1.01.02"
+SERVER_NAME = "ae_server"
+SERVER_KEY  = "yiballserver"
+
+def postByCurl(url, data):
+    try:
+        output = requests.post(url, data)
+        return output.text
+    except Exception as e:
+        print(e)
+        print(traceback.format_exec())
+
+def getToolsVersion(name, version):
+    url = YUN_ADMIN_SERVER_URL+'/yunadmin/toolsversion/checkversion'
+    data = {"name": name, "version": version}
+    output = postByCurl(url, data)
+    return json.loads(output)
 
 def save2File(file, content):
     with open(file, "a", encoding='utf-8') as f:
@@ -41,7 +60,7 @@ class ServerServicer(wxrpcauth_pb2.wxAuthServicer):
                 resultDict['info'] = []
             else:
                 resultDict['result'] = 'NOK'
-                resultDict['info'] = []
+                resultDict['info'] = ['ffmpeg command run error']
         else:
             noFoundFile = {}
             if len(result[0]) == 0:
@@ -81,56 +100,18 @@ class ServerServicer(wxrpcauth_pb2.wxAuthServicer):
             input('无法连接到验证服务器，请联系开发人员，按回车键退出。。。')
             return
 
-
-class wxClient(object):
-    """docstring for wxClient"""
-    def __init__(self, host):
-        super(wxClient, self).__init__()
-        self.port = '1338'
-
-        # http connect
-        try:
-            channel = grpc.insecure_channel('{}:{}'.format(host, self.port))
-            self.stub = wxrpcauth_pb2.wxAuthStub(channel)
-        except Exception as e:
-            print(e)
-            input('无法连接到验证服务器，请联系开发人员，按回车键退出。。。')
-            return
-
-    def checkVersion(self, version):
-        response = self.stub.checkServerVersion(wxrpcauth_pb2.AuthRequest(name=version))
-        if response.message == "OK":
-            return "OK"
-        else:
-            return response.message
-
-    def callAutoEditor(self, file):
-        try:
-            response = self.stub.CallAutoEditor(wxrpcauth_pb2.AuthRequest(name=file))
-            print(eval(response.message))
-            # self.parentWin.refresh_task_status_completed(response.message)
-        except Exception as e:
-            print("===========gRPC error=============")
-            # self.parentWin.refresh_status_bar("无法连接到服务器，请检查服务器是否启动！")
-            raise
-
-
 def main():
-    # get IP
-    with open("config.conf", encoding='utf-8') as f:
-        json_object = json.load(f)
-        authIP = json_object['authIP']
-
-    # check verison
-    client = wxClient(authIP)
-    result = client.checkVersion(SERVER_VERSION)
-    if "OK" == result:
-        serve()
+    result = getToolsVersion(SERVER_NAME, SERVER_VERSION)
+    if result['success']:
+        if (SERVER_KEY == result['data']):
+            serve()
+        else:
+            tips= "ERROR!!! your tools is valid, pls ask for yiball"
+            input(tips)
     else:
-        tips= "ERROR!!! Please upgrade program to %s" % result
+        tips= "ERROR!!! message is  %s" % result['message']
         input(tips)
-
-    
+   
 def serve():
     port = '1337'
     
