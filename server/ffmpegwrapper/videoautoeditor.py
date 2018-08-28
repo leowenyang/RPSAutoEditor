@@ -20,7 +20,7 @@ from .timerCounter import *
 class FFProbeFactory(object):
     """docstring for FFProbeFactory"""
     def __init__(self, inFile):
-        self.input = Input2('"'+inFile+'"')
+        self.input = Input('"'+inFile+'"')
         self.input.add_formatparam('-hide_banner', None)
         self.output = Output(None)
 
@@ -30,9 +30,6 @@ class FFProbeFactory(object):
         self.input.add_formatparam('-of', 'default=noprint_wrappers=1:nokey=1')
 
         result = self.run()
-        print("-----------")
-        print(result)
-        print("-----------")
         if len(result) == 1:
             result = float(result[0].decode('utf-8'))
         return result
@@ -76,9 +73,23 @@ class FFProbeFactory(object):
         self.input.add_formatparam('-of', 'default=noprint_wrappers=1:nokey=1')
 
         result = self.run()
+        print("+++++++++")
+        print(result)
         if len(result) == 1:
             result = result[0].decode('utf-8')
             result = eval(result)
+        return result
+
+    def getVideoFrames(self):
+        self.input.add_formatparam('-v', 'error')
+        self.input.add_formatparam('-count_frames', None)
+        self.input.add_formatparam('-select_streams', 'v:0')
+        self.input.add_formatparam('-show_entries', 'stream=nb_read_frames')
+        self.input.add_formatparam('-of', 'default=noprint_wrappers=1:nokey=1')
+
+        result = self.run()
+        if len(result) == 1:
+          result = int(result[0].decode('utf-8'))
         return result
 
     """
@@ -169,6 +180,11 @@ class FFMpegFactory(object):
         self.output.add_formatparam('-avoid_negative_ts', '1')
         self.output.add_formatparam('-seek2any', '1')
 
+    def videoCut_2(self, start, end):
+        # Output
+        strFilter = 'trim=%s:%s' % (start, end)
+        self.output.add_formatparam('-filter_complex', strFilter)
+
     def addFilter(self, filter):
         # Output
         self.output.add_formatparam('-filter_complex', filter)
@@ -224,6 +240,12 @@ class FFMpegFactory(object):
         # Output (以度表示)
         strFilter = 'rotate=-(%s*PI/180)' % (angle)
         self.output.add_formatparam('-filter_complex', strFilter)
+
+    def videoReverse(self):
+        # Output
+        strFilter = '[0:v]reverse[r]'
+        self.output.add_formatparam('-filter_complex', strFilter)
+        self.output.add_formatparam('-map', '[r]')
 
     def videoCBS(self, contrast=1, brightness=0, saturation=1):
         # contrast -2.0 to 2.0. The default value is "1".
@@ -379,12 +401,44 @@ class FFMpegFactory(object):
         self.output.add_formatparam('-vf', strFilter)
         self.output.add_formatparam('-t', during)
 
+    def videoMoveScale(self, w1, w2, frame, frameRate):
+        # Output
+        # (1/e^(ln(w2/w1)/(n-1))^in
+        zoom = "pow(1/exp(log(%s/%s)/(%s-1)),in)" % (w2, w1, frame)
+        # zoom = "%s*%s/(%s*%s-(%s-%s))" % (frame, w1, frame, w1, w1, w2)
+        strFilter = "zoompan=z='%s':s=1920x1080:d=1:x=0:y=0:fps=%s" \
+           % (zoom, frameRate)
+        #strFilter = "zoompan=z='1+in/1000':d=1:y='if(gte(zoom,1.5),y,y+1)':x='x'"
+        self.output.add_formatparam('-filter_complex', strFilter)
+
     def cameraMove(self, x, y, frameRate):
         # Output
         strFilter = 'zoompan=z="1+in/800":s=1920x1080:d=1:x=%s:y=%s:fps=%s' % (x, y, frameRate)
         #strFilter = "zoompan=z='1+in/1000':d=1:y='if(gte(zoom,1.5),y,y+1)':x='x'"
         self.output.add_formatparam('-filter_complex', strFilter)
         # self.mp4Format_2('60')
+
+    def cameraWalk(self, srcX, srcY, dstX, dstY, width, height, frames):
+        # Output
+        speed = '(abs(%s-%s)/%s)*n' % (dstX, srcX, frames)
+        if dstX == srcX:
+          xPos = '%s' % (srcX)
+        elif dstX > srcX:
+          xPos = "'if(gte(%s,%s+%s),(%s+%s),%s)'" % (dstX, srcX, speed, srcX, speed, dstX)
+        else:
+          xPos = "'if(gte(%s-%s,%s),%s-%s,%s)'" % (srcX, speed, dstX, srcX, speed, dstX)
+
+        speed = '(abs(%s-%s)/%s)*n' % (dstY, srcY, frames)
+        if dstY == srcY:
+          yPos = '%s' % (srcY)
+        elif dstY > srcY:
+          yPos = "'if(gte(%s,%s+%s),(%s+%s),%s)'" % (dstY, srcY, speed, srcY, speed, dstY)
+        else:
+          yPos = "'if(gte(%s-%s,%s),%s-%s,%s)'" % (srcY, speed, dstY, srcY, speed, dstY)
+
+
+        strFilter = '"crop=%s:%s:%s:%s"' % (width, height, xPos, yPos)
+        self.output.add_formatparam('-filter_complex', strFilter)
 
     def vidstabdetect(self):
         # Output
@@ -530,6 +584,38 @@ class VideoAutoEditor():
     """docstring for VideoAutoEditor"""
     def __init__(self):
         self.timerCounter = CountingTimer()
+
+    def __videoScale(self, inFile, outFile, width1, width2):
+        probe = FFProbeFactory(inFile)
+        frames = probe.getVideoFrames()
+        probe = FFProbeFactory(inFile)
+        frameRate = probe.getVideoFrameRate()
+        if width1 > width2:
+            ffmpegManger = FFMpegFactory(inFile, outFile)
+            ffmpegManger.videoMoveScale(width1, width2, frames, frameRate)
+            ffmpegManger.run()
+        else:
+            outputPath = os.path.splitext(inFile)
+            outputName = outputPath[0]
+            outputExName = outputPath[1]
+            # reverse
+            outputFile = outputName + '_rot1_' + outputExName
+            ffmpegManger = FFMpegFactory(inFile, outputFile)
+            ffmpegManger.videoReverse()
+            ffmpegManger.run()
+            # scale
+            inFile = outputFile
+            outputFile = outputName + '_scale_' + outputExName
+            ffmpegManger = FFMpegFactory(inFile, outputFile)
+            ffmpegManger.videoMoveScale(width2, width1, frames, frameRate)
+            ffmpegManger.run()
+            # reverse
+            inFile = outputFile
+            ffmpegManger = FFMpegFactory(inFile, outFile)
+            ffmpegManger.videoReverse()
+            ffmpegManger.run()
+        return
+
 
     def getFrameRate(self, file):
         # probe = FFProbeFactory(file)
@@ -824,6 +910,22 @@ class VideoAutoEditor():
         result = ffmpegManger.run()
         return result
 
+    def videoReverse(self, listParam):
+        """
+        handle : ['videoReverse', 'inFile', 'outFile']
+        """
+        # check Param
+        if len(listParam) != 3:
+            print("COMMAND: videoReverse -> param format invalid")
+            print("['videoReverse', 'inFile', 'outFile']")
+            return 1
+
+        # handle
+        ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
+        ffmpegManger.videoReverse()
+        result = ffmpegManger.run()
+        return result
+
     def PIP_videoOnImg(self, listParam):
         """
         handle : ['PIP_videoOnImg', 'imgFile', 'videoFile', 'outFile']
@@ -913,6 +1015,108 @@ class VideoAutoEditor():
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         ffmpegManger.cameraMove(listParam[2], listParam[3], frameRate)
         result = ffmpegManger.run()
+        return result
+
+    def cameraWalk(self, listParam):
+        """
+        handle : ['cameraWalk', 'videoFile', [[X1, Y1, width1, height1, time1], [X2, Y2, width2, height2, time2], ...], 'outFile']
+        """
+        # check Param
+        if len(listParam) != 4:
+          print("COMMAND: cameraWalk -> param format invalid")
+          print("['cameraWalk', 'videoFile', [[X1, Y1, width1, height1, time1], [X2, Y2, width2, height2, time2], ...], 'outFile']")
+          return 1
+
+        # handle
+        # 1. cut video
+        if len(listParam[2]) < 2:
+          print("COMMAND: cameraWalk -> param format invalid")
+          return 1
+
+        outputPath = os.path.splitext(listParam[-1])
+        outputName = outputPath[0]
+        outputExName = outputPath[1]
+        outputNameList = []
+        i = 0
+        for param in listParam[2]:
+          i = i + 1
+          if i == 1:
+            x1 = param[0]
+            y1 = param[1]
+            width1 = param[2]
+            height1 = param[3]
+            start = param[4]
+            continue
+          x2 = param[0]
+          y2 = param[1]
+          width2 = param[2]
+          height2 = param[3]
+          end = param[4]
+
+          # cut video
+          outputFile = outputName + '_x_' + str(i) + outputExName
+          print(outputFile)
+          ffmpegManger = FFMpegFactory(listParam[1], outputFile)
+          ffmpegManger.videoCut_2(start, end)
+          ffmpegManger.run()
+
+
+          # video move
+          probe = FFProbeFactory(outputFile)
+          frames = probe.getVideoFrames()
+          outputFile_2 = outputName + '_x_w_' + str(i) + outputExName
+          ffmpegManger = FFMpegFactory(outputFile, outputFile_2)
+          ffmpegManger.cameraWalk(x1, y1, x2, y2, width1, height1, frames)
+          ffmpegManger.run()
+
+          # camere move
+          outputFile_3 = outputName + '_x_w_m_' + str(i) + outputExName
+          if width1 == width2:
+            outputFile_3 = outputFile_2
+          else:
+            self. __videoScale(outputFile_2, outputFile_3, width1, width2)
+          # probe = FFProbeFactory(outputFile_2)
+          # frames = probe.getVideoFrames()
+          # probe = FFProbeFactory(outputFile_2)
+          # frameRate = probe.getVideoFrameRate()
+          # outputFile_3 = outputName + '_cut_walk_m_' + str(i) + outputExName
+          # ffmpegManger = FFMpegFactory(outputFile_2, outputFile_3)
+          # ffmpegManger.videoMoveScale(width1, width2, frames, frameRate)
+          # ffmpegManger.run()
+
+          # format
+          outputFile_4 = outputName + '_x_w_m_f_' + str(i) + outputExName
+          ffmpegManger = FFMpegFactory(outputFile_3, outputFile_4)
+          ffmpegManger.outputFormat()
+          ffmpegManger.run()
+
+          outputNameList.append(outputFile_4)
+
+          # save lastest data
+          x1 = x2
+          y1 = y2
+          width1 = width2
+          height1 = height2
+          start = end
+
+        # 3. merge clips
+        # create video list
+        print(outputNameList)
+        listLen = len(outputNameList)
+        f = open("filelist.txt", "w", encoding='utf-8')
+        strFile = ''
+        for i in range(0, listLen):
+            strFile += "file '%s' \n" % outputNameList[i]
+        f.write(strFile)
+        f.close()
+
+        # handle
+        ffmpegManger = FFMpegFactory('filelist.txt', listParam[-1])
+        ffmpegManger.videoMerge()
+        result = ffmpegManger.run()
+
+        #os.remove("filelist.txt")
+
         return result
 
     def addSubtitle(self, listParam):

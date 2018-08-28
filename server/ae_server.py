@@ -17,7 +17,7 @@ import json
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 YUN_ADMIN_SERVER_URL = 'http://180.76.189.114:4545'
 
-SERVER_VERSION = "1.01.02"
+SERVER_VERSION = "1.01.04"
 SERVER_NAME = "ae_server"
 SERVER_KEY  = "yiballserver"
 
@@ -111,10 +111,10 @@ def main():
     else:
         tips= "ERROR!!! message is  %s" % result['message']
         input(tips)
-   
+
 def serve():
     port = '1337'
-    
+
     try:
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
         wxrpcauth_pb2.add_wxAuthServicer_to_server(ServerServicer(), server)

@@ -17,11 +17,19 @@ def test():
     # during = editor.creatMuteAudio("clip.mp4")
     # print(during)
 
-    probe = FFProbeFactory("\\\\192.168.0.140\\忆球工具\\自动化剪辑素材\\通用背景音乐\\Linkin Park-New Divide(《变形金刚2》电影主题曲).mp3")
-    len = probe.getVideoLen()
-    print(1)
-    print(len)
-    print(2)
+    # probe = FFProbeFactory("E:\\work\\创业之路\\音视频技术\\并行计算\\自动化剪辑\\server\\clip.mp4")
+    # len = probe.getVideoFrameRate()
+    # print(1)
+    # print(len)
+    # print(2)
+
+    handle = ['videoReverse', 'E:\\work\\创业之路\\音视频技术\\并行计算\\自动化剪辑\\server\\clip.mp4', 'E:\\work\\创业之路\\音视频技术\\并行计算\\自动化剪辑\\server\\clip_reverse.mp4']
+    editor = VideoAutoEditor()
+    editor.videoReverse(handle)
+
+    # handle = ['cameraWalk', 'E:\\work\\创业之路\\音视频技术\\并行计算\\自动化剪辑\\server\\clip.mp4', [['500', '100', '1280', '720', '2'], ['0', '100', '1280', '720', '8'], ['100', '0', '1280', '720', '10']], 'E:\\work\\创业之路\\音视频技术\\并行计算\\自动化剪辑\\server\\clip_walk.mp4']
+    # editor = VideoAutoEditor()
+    # editor.cameraWalk(handle)
 
     # handle = ['addVoice', 'clip.mp4', '1', '3', 'clip_voice.mp4']
     # editor = VideoAutoEditor()
@@ -586,6 +594,22 @@ def parseStrategy_new(strategyFile, num=1):
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
+            if 'camera_walk' == cmd:
+                if len(param) == 0:
+                    continue
+                # videoFade
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_walk"+str(nClip)+str(nAction)+baseName[-4:])
+                clipData.addAction(actionCameraWalk(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+
+                # rmShaky
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_walkrmshaky"+str(nClip)+str(nAction)+baseName[-4:])
+                clipData.addAction(actionRmShaky(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
             if 'set_cbs' == cmd:
                 # videoCBS
                 cbsParam = transCBS(param[0], param[1], param[2])
@@ -721,6 +745,9 @@ def actionScale(inFile, outFile, param):
 
 def actionCameraMove(inFile, outFile, param):
     return buildCmd("cameraMove", param, inFile, outFile)
+
+def actionCameraWalk(inFile, outFile, param):
+    return buildCmd("cameraWalk", param, inFile, outFile)
 
 def actionRmShaky(inFile, outFile, param):
     return buildCmd("rmShaky", [], inFile, outFile)
@@ -918,7 +945,7 @@ if __name__ == '__main__':
     # print(result)
     #print(getBasenameFromUrl("http://bj.bcebos.com/yunedit/2018-02-08-8/2018-02-08-20-13-42/youhou_recording_20180208200933.mp4?authorization=bce-auth-v1%2F4008bf94cec3456985732a43b18051a9%2F2018-02-09T11%3A06%3A49Z%2F1800%2Fhost%2Fa5e62a1ac2f4e56a3bbadff4e6969f928a91cccead9e2d66e404465d03f47ad6"))
     #parseStrategy_new("//Ybserver_one/视频剪辑/万科/万科业主06/集锦/strategy.json")
-    file = "//Ybserver_one/视频剪辑/滴滴篮球/DiBA05/04.精彩(2上0.02.15)(主-J&Y)[进球]《入集》/strategy_xiaopian.json"
+    file = "//Ybserver_one/视频剪辑/无人录制/无人5/04.精彩(2上0.14.16)(客-北大附中)《入集》/strategy_jijin.json"
     parseStrategy_new(file)
     aeScript = diffAutoEditFile_new(file)
     handleAutoEdit_new(aeScript)
