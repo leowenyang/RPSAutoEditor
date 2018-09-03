@@ -411,6 +411,32 @@ class FFMpegFactory(object):
         #strFilter = "zoompan=z='1+in/1000':d=1:y='if(gte(zoom,1.5),y,y+1)':x='x'"
         self.output.add_formatparam('-filter_complex', strFilter)
 
+    def videoMoveScale_yb(self, x1, y1, w1, h1, x2, y2, w2, h2, frame, frameRate):
+        # Output
+        speed = '(abs(%s-%s)/%s)*in' % (x2, x1, frame)
+        if x2 == x1:
+          xPos = '%s' % (x1)
+        elif x2 > x1:
+          xPos = "'if(gte(%s,%s+%s),(%s+%s),%s)'" % (x2, x1, speed, x1, speed, x2)
+        else:
+          xPos = "'if(gte(%s-%s,%s),%s-%s,%s)'" % (x1, speed, x2, x1, speed, x2)
+
+        speed = '(abs(%s-%s)/%s)*in' % (y2, y1, frame)
+        if y2 == y1:
+          yPos = '%s' % (y1)
+        elif y2 > y1:
+          yPos = "'if(gte(%s,%s+%s),(%s+%s),%s)'" % (y2, y1, speed, y1, speed, y2)
+        else:
+          yPos = "'if(gte(%s-%s,%s),%s-%s,%s)'" % (y1, speed, y2, y1, speed, y2)
+
+        # (1/e^(ln(w2/w1)/(n-1))^in
+        zoom = "pow(exp(log(%s/%s)/(%s-1)),in)" % (w2, w1, frame)
+        # zoom = "%s*%s/(%s*%s-(%s-%s))" % (frame, w1, frame, w1, w1, w2)
+        strFilter = "zoomscale=z='%s':s=1920x1080:d=1:x=%s:y=%s:w=%s:h=%s:fps=%s" \
+           % (zoom, xPos, yPos, w1, h1, frameRate)
+        #strFilter = "zoompan=z='1+in/1000':d=1:y='if(gte(zoom,1.5),y,y+1)':x='x'"
+        self.output.add_formatparam('-filter_complex', strFilter)
+
     def cameraMove(self, x, y, frameRate):
         # Output
         strFilter = 'zoompan=z="1+in/800":s=1920x1080:d=1:x=%s:y=%s:fps=%s' % (x, y, frameRate)
@@ -442,12 +468,12 @@ class FFMpegFactory(object):
 
     def vidstabdetect(self):
         # Output
-        strFilter = 'vidstabdetect=stepsize=6:shakiness=8:accuracy=9:result=mytransforms.trf'
+        strFilter = 'vidstabdetect=stepsize=6:shakiness=1:accuracy=9:result=mytransforms.trf'
         self.output.add_formatparam('-filter_complex', strFilter)
         self.output.add_formatparam('-f', 'null')
 
     def vidstabtransform(self):
-        strFilter = 'vidstabtransform=input=mytransforms.trf:zoom=1:maxangle=3*PI/180:smoothing=30,unsharp=5:5:0.8:3:3:0.4'
+        strFilter = 'vidstabtransform=input=mytransforms.trf:zoom=0:maxangle=3*PI/180:smoothing=3,unsharp=5:5:0.8:3:3:0.4'
         self.output.add_formatparam('-filter_complex', strFilter)
 
     def palettegen(self):
@@ -580,42 +606,34 @@ class FFMpegFactory(object):
         # FFmpeg(sys.path[0]+'/bin/ffmpeg.exe', self.input, self.output).run()
         return FFmpeg(os.path.join(os.path.abspath('.'), 'bin','ffmpeg.exe'), self.input, self.output).run()
 
+    def run_yb(self):
+        self.output.overwrite()
+        #获取当前工作目录
+        currPath = os.getcwd()
+        #更改当前工作目录
+        os.chdir(os.path.join(currPath, 'bin_yb'))
+        # FFmpeg(sys.path[0]+'/bin/ffmpeg.exe', self.input, self.output).run()
+        result = FFmpeg(os.path.join(os.path.abspath('.'), 'ffmpeg.exe'), self.input, self.output).run()
+        os.chdir(currPath)
+        return result
+
 class VideoAutoEditor():
     """docstring for VideoAutoEditor"""
     def __init__(self):
         self.timerCounter = CountingTimer()
 
-    def __videoScale(self, inFile, outFile, width1, width2):
+    def __videoScale(self, inFile, outFile,
+                        x1, y1, w1, h1,
+                        x2, y2, w2, h2):
         probe = FFProbeFactory(inFile)
         frames = probe.getVideoFrames()
         probe = FFProbeFactory(inFile)
         frameRate = probe.getVideoFrameRate()
-        if width1 > width2:
-            ffmpegManger = FFMpegFactory(inFile, outFile)
-            ffmpegManger.videoMoveScale(width1, width2, frames, frameRate)
-            ffmpegManger.run()
-        else:
-            outputPath = os.path.splitext(inFile)
-            outputName = outputPath[0]
-            outputExName = outputPath[1]
-            # reverse
-            outputFile = outputName + '_rot1_' + outputExName
-            ffmpegManger = FFMpegFactory(inFile, outputFile)
-            ffmpegManger.videoReverse()
-            ffmpegManger.run()
-            # scale
-            inFile = outputFile
-            outputFile = outputName + '_scale_' + outputExName
-            ffmpegManger = FFMpegFactory(inFile, outputFile)
-            ffmpegManger.videoMoveScale(width2, width1, frames, frameRate)
-            ffmpegManger.run()
-            # reverse
-            inFile = outputFile
-            ffmpegManger = FFMpegFactory(inFile, outFile)
-            ffmpegManger.videoReverse()
-            ffmpegManger.run()
-        return
+        ffmpegManger = FFMpegFactory(inFile, outFile)
+        ffmpegManger.videoMoveScale_yb(x1, y1, w1, h1, x2, y2, w2, h2, frames, frameRate)
+        ffmpegManger.run_yb()
 
+        return
 
     def getFrameRate(self, file):
         # probe = FFProbeFactory(file)
@@ -1060,37 +1078,28 @@ class VideoAutoEditor():
           ffmpegManger.videoCut_2(start, end)
           ffmpegManger.run()
 
-
           # video move
-          probe = FFProbeFactory(outputFile)
-          frames = probe.getVideoFrames()
-          outputFile_2 = outputName + '_x_w_' + str(i) + outputExName
-          ffmpegManger = FFMpegFactory(outputFile, outputFile_2)
-          ffmpegManger.cameraWalk(x1, y1, x2, y2, width1, height1, frames)
-          ffmpegManger.run()
-
-          # camere move
-          outputFile_3 = outputName + '_x_w_m_' + str(i) + outputExName
           if width1 == width2:
-            outputFile_3 = outputFile_2
+              probe = FFProbeFactory(outputFile)
+              frames = probe.getVideoFrames()
+              outputFile_2 = outputName + '_x_w_' + str(i) + outputExName
+              ffmpegManger = FFMpegFactory(outputFile, outputFile_2)
+              ffmpegManger.cameraWalk(x1, y1, x2, y2, width1, height1, frames)
+              ffmpegManger.run()
           else:
-            self. __videoScale(outputFile_2, outputFile_3, width1, width2)
-          # probe = FFProbeFactory(outputFile_2)
-          # frames = probe.getVideoFrames()
-          # probe = FFProbeFactory(outputFile_2)
-          # frameRate = probe.getVideoFrameRate()
-          # outputFile_3 = outputName + '_cut_walk_m_' + str(i) + outputExName
-          # ffmpegManger = FFMpegFactory(outputFile_2, outputFile_3)
-          # ffmpegManger.videoMoveScale(width1, width2, frames, frameRate)
-          # ffmpegManger.run()
+              # camere move
+              outputFile_2 = outputName + '_x_m_' + str(i) + outputExName
+              self. __videoScale(outputFile, outputFile_2,
+                    x1, y1, width1, height1,
+                    x2, y2, width2, height2)
 
           # format
-          outputFile_4 = outputName + '_x_w_m_f_' + str(i) + outputExName
-          ffmpegManger = FFMpegFactory(outputFile_3, outputFile_4)
+          outputFile_3 = outputName + '_x_w_m_f_' + str(i) + outputExName
+          ffmpegManger = FFMpegFactory(outputFile_2, outputFile_3)
           ffmpegManger.outputFormat()
           ffmpegManger.run()
 
-          outputNameList.append(outputFile_4)
+          outputNameList.append(outputFile_3)
 
           # save lastest data
           x1 = x2

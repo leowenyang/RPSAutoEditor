@@ -945,7 +945,7 @@ if __name__ == '__main__':
     # print(result)
     #print(getBasenameFromUrl("http://bj.bcebos.com/yunedit/2018-02-08-8/2018-02-08-20-13-42/youhou_recording_20180208200933.mp4?authorization=bce-auth-v1%2F4008bf94cec3456985732a43b18051a9%2F2018-02-09T11%3A06%3A49Z%2F1800%2Fhost%2Fa5e62a1ac2f4e56a3bbadff4e6969f928a91cccead9e2d66e404465d03f47ad6"))
     #parseStrategy_new("//Ybserver_one/视频剪辑/万科/万科业主06/集锦/strategy.json")
-    file = "//Ybserver_one/视频剪辑/无人录制/无人5/04.精彩(2上0.14.16)(客-北大附中)《入集》/strategy_jijin.json"
+    file = "//Ybserver_one/视频剪辑/无人录制/无人6/04.精彩(2上0.11.04)(客-实验中学)《入集》/strategy_jijin.json"
     parseStrategy_new(file)
     aeScript = diffAutoEditFile_new(file)
     handleAutoEdit_new(aeScript)

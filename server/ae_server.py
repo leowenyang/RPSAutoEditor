@@ -4,6 +4,7 @@
 import time
 import requests
 import traceback
+import argparse
 from concurrent import futures
 from pkg_resources import *
 
@@ -17,9 +18,14 @@ import json
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 YUN_ADMIN_SERVER_URL = 'http://180.76.189.114:4545'
 
-SERVER_VERSION = "1.01.04"
+SERVER_VERSION = "2.00.02"
 SERVER_NAME = "ae_server"
 SERVER_KEY  = "yiballserver"
+SERVER_DESCRIPTION = '''
+*************************
+*    忆球云剪辑服务器    *
+*************************
+'''
 
 def postByCurl(url, data):
     try:
@@ -100,6 +106,16 @@ class ServerServicer(wxrpcauth_pb2.wxAuthServicer):
             input('无法连接到验证服务器，请联系开发人员，按回车键退出。。。')
             return
 
+def usage():
+    parser = argparse.ArgumentParser(description=SERVER_DESCRIPTION)
+    parser.add_argument("--version", help='显示版本信息', action="store_true")
+    args = parser.parse_args()
+    if args.version:
+        print(SERVER_VERSION)
+        return
+    print(SERVER_DESCRIPTION)
+    main()
+
 def main():
     result = getToolsVersion(SERVER_NAME, SERVER_VERSION)
     if result['success']:
@@ -135,4 +151,4 @@ def serve():
        server.stop(0)
 
 if __name__ == '__main__':
-    main()
+    usage()
