@@ -20,26 +20,41 @@ init()
 ##########################################
 
 def test_getFrameRate():
-    inFile = os.path.join(os.path.abspath('.'), 'unitTest', 'data','testVideo.mp4')
+    inFile = os.path.join(os.path.abspath('.'),
+        'unitTest',
+        'data',
+        'testVideo.mp4')
     editor = VideoAutoEditor()
     result = editor.getFrameRate(inFile)
     assert(result == '30')
 
 def test_checkVideoMute():
-    inFile = os.path.join(os.path.abspath('.'), 'unitTest', 'data','testVideo.mp4')
+    inFile = os.path.join(os.path.abspath('.'),
+        'unitTest',
+        'data',
+        'testVideo.mp4')
     editor = VideoAutoEditor()
     result = editor.checkVideoMute(inFile)
     assert(result == False)
 
 def test_getVideoLen():
-    inFile = os.path.join(os.path.abspath('.'), 'unitTest', 'data','testVideo.mp4')
+    inFile = os.path.join(os.path.abspath('.'),
+        'unitTest',
+        'data',
+        'testVideo.mp4')
     editor = VideoAutoEditor()
     result = editor.getVideoLen(inFile)
     assert(result == 10)
 
 def test_videoCut():
-    inFile = os.path.join(os.path.abspath('.'), 'unitTest', 'data','testVideo.mp4')
-    outFile = os.path.join(os.path.abspath('.'), 'unitTest', 'data','testVideo_x.mp4')
+    inFile = os.path.join(os.path.abspath('.'),
+        'unitTest',
+        'data',
+        'testVideo.mp4')
+    outFile = os.path.join(os.path.abspath('.'),
+        'unitTest',
+        'data',
+        'testVideo_x.mp4')
     handle = ['videoCut', inFile, 3, 5, outFile]
     editor = VideoAutoEditor()
     editor.videoCut(handle)
@@ -123,10 +138,30 @@ def test_creatMuteAudio():
 # def test_videoToGif(self, listParam):
 # def test_rmShaky(self, listParam):
 
+def test_videoSharp():
+    inFile = os.path.join(os.path.abspath('.'),
+        'unitTest',
+        'data',
+        'testVideo.mp4')
+    outFile = os.path.join(os.path.abspath('.'),
+        'unitTest',
+        'data',
+        'testVideo_sharp.mp4')
+    handle = ['videoSharp', inFile, outFile]
+    editor = VideoAutoEditor()
+    editor.videoSharp(handle)
+    assert os.path.exists(outFile)
+    os.remove(outFile)
 
 def test_videoReverse():
-    inFile = os.path.join(os.path.abspath('.'), 'unitTest', 'data','testVideo.mp4')
-    outFile = os.path.join(os.path.abspath('.'), 'unitTest', 'data','testVideo_reverse.mp4')
+    inFile = os.path.join(os.path.abspath('.'),
+        'unitTest',
+        'data',
+        'testVideo.mp4')
+    outFile = os.path.join(os.path.abspath('.'),
+        'unitTest',
+        'data',
+        'testVideo_reverse.mp4')
     handle = ['videoReverse', inFile, outFile]
     editor = VideoAutoEditor()
     editor.videoReverse(handle)

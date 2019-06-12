@@ -1,5 +1,12 @@
-Releasee/
+Release/
+7-zip/
+build/
+dist/
+server.ico
 client.zip
+*.spec
+__pycache__
+.*
 frei0r-plugins-x86_64-1.5-tarball-20-g1ce7383.7z
 frei0r-plugins-x86-1.5-tarball-20-g1ce7383.7z
 yiball123.pkl

@@ -183,6 +183,32 @@ def getBasenameFromUrl(url):
     url = url[start+1:]
     return url
 
+def downloadFromUrl(url, dstFolder):
+    if url.find('http://bj.bcebos.com') == -1:
+        return url
+    else:
+      baseName = getBasenameFromUrl(url)
+      outFile = os.path.join(dstFolder, baseName)
+
+      item_list = None
+      cmd = '%s --tries=3 -O "%s" "%s"' % (os.path.join(os.path.abspath('.'), 'bin','wget.exe'), outFile, url)
+      # p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+      # p.wait()
+      # item_list = p.stdout.read().splitlines()
+
+      os.system(cmd)
+
+      # for i in range(len(item_list)):
+      #     try:
+      #         item = item_list[i].decode('utf-8')
+      #     except:
+      #         item = str(item_list[i])
+
+      #     if "Audio" in item:
+      #         return False
+      return outFile
+
+
 def addMusic(strategyFile):
     # handle config
     resultFile = ''
@@ -414,6 +440,9 @@ def parseStrategy_new(strategyFile, num=1):
         actions = clip.get('actions', "")
         baseName = getBasenameFromUrl(file)
 
+        # Download file
+        file = downloadFromUrl(file, ouputFolder)
+
         # check file is exsit
         if not checkFileExists(file):
             resultList.append(file)
@@ -618,6 +647,15 @@ def parseStrategy_new(strategyFile, num=1):
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
+
+            if 'video_sharp' == cmd:
+                # videoCBS
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_sharp"+str(nClip)+str(nAction)+baseName[-4:])
+                clipData.addAction(actionVideoSharp(finalOutputFile, outputFile, []))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+
             if 'add_filter' == cmd:
                 # add filter
                 if (param == None or len(param) == 0):
@@ -631,6 +669,13 @@ def parseStrategy_new(strategyFile, num=1):
                 # add filter
                 outputFile = os.path.join(ouputFolder, baseName[:-4]+"_time"+str(nClip)+str(nAction)+baseName[-4:])
                 clipData.addAction(actionShowTime(finalOutputFile, outputFile, param))
+                clipData.setOutVideoFile(outputFile)
+                # clipData.setOutAudioFile()
+                finalOutputFile = outputFile
+            if 'add_matchtime' == cmd:
+                # add filter
+                outputFile = os.path.join(ouputFolder, baseName[:-4]+"_matchtime"+str(nClip)+str(nAction)+baseName[-4:])
+                clipData.addAction(actionShowMatchTime(finalOutputFile, outputFile, param))
                 clipData.setOutVideoFile(outputFile)
                 # clipData.setOutAudioFile()
                 finalOutputFile = outputFile
@@ -717,6 +762,9 @@ def parseStrategy_new(strategyFile, num=1):
 
     return resultList
 
+def actionVideoSharp(inFile, outFile, param):
+    return buildCmd("videoSharp", param, inFile, outFile)
+
 def actionCreateMuteAudio(inFile, outFile, param):
     return buildCmd("creatMuteAudio", param, inFile, outFile)
 
@@ -781,6 +829,9 @@ def actionAddFilter(inFile, outFile, param):
 
 def actionShowTime(inFile, outFile, param):
     return buildCmd("showTime", param, inFile, outFile)
+
+def actionShowMatchTime(inFile, outFile, param):
+    return buildCmd("showMatchTime", param, inFile, outFile)
 
 def actionAddVoice(inFile, outFile, param):
     return buildCmd("addVoice", param, inFile, outFile)
@@ -945,7 +996,7 @@ if __name__ == '__main__':
     # print(result)
     #print(getBasenameFromUrl("http://bj.bcebos.com/yunedit/2018-02-08-8/2018-02-08-20-13-42/youhou_recording_20180208200933.mp4?authorization=bce-auth-v1%2F4008bf94cec3456985732a43b18051a9%2F2018-02-09T11%3A06%3A49Z%2F1800%2Fhost%2Fa5e62a1ac2f4e56a3bbadff4e6969f928a91cccead9e2d66e404465d03f47ad6"))
     #parseStrategy_new("//Ybserver_one/视频剪辑/万科/万科业主06/集锦/strategy.json")
-    file = "//Ybserver_one/视频剪辑/无人录制/无人6/04.精彩(2上0.11.04)(客-实验中学)《入集》/strategy_jijin.json"
+    file = "//Ybserver_one/视频剪辑/青超赛/青超24/04.精彩(2上0.00.25)(主-北京八喜)[扑救]【一般精彩】《入集》/strategy_jijin.json"
     parseStrategy_new(file)
     aeScript = diffAutoEditFile_new(file)
     handleAutoEdit_new(aeScript)
