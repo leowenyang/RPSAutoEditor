@@ -320,12 +320,18 @@ class FFMpegFactory(object):
         self.output.add_formatparam('-f', 'image2')
         self.output.add_formatparam('-vframes', '1')
 
-    def oneImgToVideo(self, time):
-        # Input
+    def oneImgToVideo(self, time, width='1920', height='1080', background='black'):
+        # Input=black:s=1920x1080
+        self.input.add_formatparam('-f', 'lavfi')
+        strColor = 'color=%s:s=%sx%s' % (background, width, height)
+        self.input.add_formatparam('-i', strColor)
         self.input.add_formatparam('-loop', '1')
-        self.input.add_formatparam('-f', 'image2')
+        # self.input.add_formatparam('-f', 'image2')
 
         # Output
+        strFilter = '[1:v]scale=-1:%s[pic];[0:v][pic]overlay=x=(W-w)/2:y=(H-h)/2[out]' % (height)
+        self.output.add_formatparam('-filter_complex', strFilter)
+        self.output.add_formatparam('-map', '[out]')
         self.output.add_formatparam('-t', time)
 
     def videoOverlayVideo(self, file):
@@ -527,6 +533,34 @@ class FFMpegFactory(object):
         # Output
         strFilter = 'unsharp=la=%s:ca=%s' % (luma, chroma)
         self.output.add_formatparam('-filter_complex', strFilter)
+
+    """
+    Image Handle
+    """
+    def colorMove(self, x, y, start, end, speed, color, width, height, direct):
+       # Input=black:s=1920x1080
+      self.input.add_formatparam('-f', 'lavfi')
+      strColor = 'color=c=%s:s=%sx%s' % (color, width, height)
+      self.input.add_formatparam('-i', strColor)
+
+      # Output
+      during = end - start
+      # up
+      if direct == 1:
+        strFilter = "[1:v][0:v]overlay=y='if(between(t,%s,%s),(%s-%s*(t-%s)),if(lte(t,%s),%s,NAN))':x=%s:shortest=1[out]" % (start, end, y, speed, start, start, y, x)
+      # down
+      elif direct == 2:
+        strFilter = "[1:v][0:v]overlay=y='if(between(t,%s,%s),(%s+%s*(t-%s)),if(lte(t,%s),%s,NAN))':x=%s:shortest=1[out]" % (start, end, y, speed, start, start, y, x)
+      # left
+      elif direct == 3:
+        strFilter = "[1:v][0:v]overlay=x='if(between(t,%s,%s),(%s-%s*(t-%s)),if(lte(t,%s),%s,NAN))':y=%s:shortest=1[out]" % (start, end, x, speed, start, start, x, y)
+      # right
+      elif direct == 4:
+        strFilter = "[1:v][0:v]overlay=x='if(between(t,%s,%s),(%s+%s*(t-%s)),if(lte(t,%s),%s,NAN))':y=%s:shortest=1[out]" % (start, end, x, speed, start, start, x, y)
+      self.output.add_formatparam('-filter_complex', strFilter)
+      self.output.add_formatparam('-map', '[out]')
+
+      pass
 
     """
     Audio Handle
@@ -1007,17 +1041,17 @@ class VideoAutoEditor():
 
     def oneImgToVideo(self, listParam):
         """
-        handle : ['imgToVideo', 'imgFile', 'during', 'videoFile']
+        handle : ['oneImgToVideo', 'imgFile', 'during', 'width', 'height', 'background', 'videoFile']
         """
         # check Param
-        if len(listParam) != 4:
+        if len(listParam) != 7:
             print("COMMAND: imgToVideo -> param format invalid")
-            print("['imgToVideo', 'imgFile', 'during', 'videoFile']")
+            print("['oneImgToVideo', 'imgFile', 'during', 'width', 'height', 'background', 'videoFile']")
             return 1
 
         # handle
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
-        ffmpegManger.oneImgToVideo(listParam[2])
+        ffmpegManger.oneImgToVideo(listParam[2], listParam[3], listParam[4], listParam[5])
         result = ffmpegManger.run()
         return result
 
@@ -1678,6 +1712,53 @@ class VideoAutoEditor():
         # step 2 -> vidstabtransform
         ffmpegManger = FFMpegFactory(listParam[1], listParam[-1])
         ffmpegManger.vidstabtransform()
+        result = ffmpegManger.run()
+        return result
+
+    ####################
+    #   特效
+    ####################
+    # def colorMove(self, x, y, start, end, speed, color, width, height, direct)
+    def openEye(self, listParam):
+        """
+        handle : ['openEye', 'videoFile', 'outFile']
+        """
+        # check Param
+        if len(listParam) != 3:
+            print(listParam)
+            print("COMMAND: rmShaky -> param format invalid")
+            print("['rmShaky', 'videoFile', 'outFile']")
+            return  1
+
+        tempFile = os.path.join(os.path.dirname(listParam[1]), 'temp.mp4')
+        width = 1920
+        height = 1080
+        color = 'black'
+        start = 1
+        end = 5
+        speed = (height/2)/(end-start)
+        # # up/down open eye
+        # # color block up
+        # ffmpegManger = FFMpegFactory(listParam[1], tempFile)
+        # ffmpegManger.colorMove(0, 0, start, end, speed, color, width, int(height/2), 1)
+        # result = ffmpegManger.run()
+
+        # # color block down
+        # ffmpegManger = FFMpegFactory(tempFile, listParam[-1])
+        # ffmpegManger.colorMove(0, int(height/2), start, end, speed, color, width, int(height/2), 2)
+        # result = ffmpegManger.run()
+        # return result
+
+        # left/right open eye
+        # color block left
+        speed = (width/2)/(end-start)
+        ffmpegManger = FFMpegFactory(listParam[1], tempFile)
+        ffmpegManger.colorMove(0, 0, start, end, speed, color, int(width/2), height, 3)
+        result = ffmpegManger.run()
+
+        # color block down
+        ffmpegManger = FFMpegFactory(tempFile, listParam[-1])
+        ffmpegManger.colorMove(int(width/2), 0, start, end, speed, color, int(width/2), height, 4)
         result = ffmpegManger.run()
         return result
 
